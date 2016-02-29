@@ -39,9 +39,6 @@ Agent.prototype._in = function (pattern, callback) {
 };
 
 Agent.prototype._eval = function (activeTuple, callback) {
-    if (this.blocked) {
-        return callback(UNAUTHORIZED_ERROR);
-    }
     const that = this;
     setImmediate(function () {
         async.map(
@@ -65,36 +62,32 @@ Agent.prototype._eval = function (activeTuple, callback) {
     });
 };
 
-Agent.prototype.out = function (tuple) {
-    return this.authorized(
-        this._out.bind(this, tuple)
-    );
+Agent.prototype.out = function (tuple, callback) {
+    if (this.blocked) {
+        return callback(UNAUTHORIZED_ERROR);
+    }
+    this._out(tuple);
 };
 
 Agent.prototype.rd = function (pattern, callback) {
-    return this.authorized(
-        this._rd.bind(this, pattern, callback)
-    );
+    if (this.blocked) {
+        return callback(UNAUTHORIZED_ERROR);
+    }
+    this._rd(pattern, callback);
 };
 
 Agent.prototype.in = function (pattern, callback) {
-    return this.authorized(
-        this._in.bind(this, pattern, callback)
-    );
-};
-
-Agent.prototype.eval = function (activeTuple) {
-    return this.authorized(
-        this._eval.bind(this, activeTuple)
-    );
-};
-
-Agent.prototype.authorized = function (operation) {
     if (this.blocked) {
-        return false;
+        return callback(UNAUTHORIZED_ERROR);
     }
-    operation();
-    return true;
+    this._in(pattern, callback);
+};
+
+Agent.prototype.eval = function (activeTuple, callback) {
+    if (this.blocked) {
+        return callback(UNAUTHORIZED_ERROR);
+    }
+    this._eval(activeTuple, callback);
 };
 
 module.exports = Agent;
