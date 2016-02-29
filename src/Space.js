@@ -33,7 +33,7 @@ Space.prototype.match = function (pattern, callback) {
     // If a tuple that matches the specified pattern can not be found in the
     // space at the moment register the callback to retry matching the pattern
     // when a new tuple is added.
-    const tuple = this.tuples.find(pattern.match);
+    const tuple = this.tuples.find(pattern.match.bind(pattern));
     if (tuple !== undefined) {
         return callback(tuple);
     }
@@ -44,7 +44,10 @@ Space.prototype.match = function (pattern, callback) {
         if (!pattern.match(tuple)) {
             return;
         }
-        that.emmiter.removeListener(tryMatchingWithNewTuple);
+        that.emitter.removeListener(
+            NEW_TUPLE_EVENT,
+            tryMatchingWithNewTuple
+        );
         callback(tuple);
     };
     this.emitter.on(NEW_TUPLE_EVENT, tryMatchingWithNewTuple);
