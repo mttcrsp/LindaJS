@@ -11,8 +11,9 @@ function Agent (space) {
     this.blocked = false;
 }
 
-Agent.prototype._out = function (tuple) {
+Agent.prototype._out = function (tuple, callback) {
     this.space.add(tuple);
+    callback();
 };
 
 Agent.prototype._rd = function (pattern, callback) {
@@ -66,7 +67,7 @@ Agent.prototype.out = function (tuple, callback) {
     if (this.blocked) {
         return callback(UNAUTHORIZED_ERROR);
     }
-    this._out(tuple);
+    this._out(tuple, callback);
 };
 
 Agent.prototype.rd = function (pattern, callback) {
