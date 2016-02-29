@@ -22,7 +22,7 @@ Agent.prototype._rd = function (pattern, callback) {
     setImmediate(function () {
         that.space.match(pattern, function (tuple) {
             that.blocked = false;
-            callback(tuple);
+            callback(undefined, tuple);
         });
     });
 };
@@ -34,7 +34,7 @@ Agent.prototype._in = function (pattern, callback) {
         that.space.match(pattern, function (tuple) {
             that.blocked = false;
             that.space.remove(tuple);
-            callback(tuple);
+            callback(undefined, tuple);
         });
     });
 };
