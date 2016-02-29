@@ -1,4 +1,4 @@
-/*eslint-disable no-undef,max-nested-callbacks*/
+/*eslint-disable no-undef,max-nested-callbacks,max-len*/
 
 'use strict';
 
@@ -25,7 +25,7 @@ describe('Pattern', function () {
             ).toNotExist();
         });
 
-        it('should match tuples using the wildcard element', function () {
+        it('should match tuples correctly using the wildcard element', function () {
             const pattern = new Pattern(1, Pattern.WILDCARD, 2);
             expect(
                 pattern.match([1, 5, 2])
@@ -33,6 +33,9 @@ describe('Pattern', function () {
             expect(
                 pattern.match([1, 'something', 2])
             ).toExist();
+            expect(
+                pattern.match([1, 'something', 3])
+            ).toNotExist();
         });
     });
 });
