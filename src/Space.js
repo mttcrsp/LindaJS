@@ -29,10 +29,6 @@ Space.prototype.remove = function (tuple) {
     this.tuples.splice(index, 1);
 };
 
-Space.prototype.createAgent = function () {
-    return new Agent(this);
-};
-
 Space.prototype.match = function (pattern, callback) {
     // If a tuple that matches the specified pattern can not be found in the
     // space at the moment register the callback to retry matching the pattern
@@ -52,6 +48,10 @@ Space.prototype.match = function (pattern, callback) {
         callback(tuple);
     };
     this.emitter.on(NEW_TUPLE_EVENT, tryMatchingWithNewTuple);
+};
+
+Space.prototype.createAgent = function () {
+    return new Agent(this);
 };
 
 module.exports = Space;
