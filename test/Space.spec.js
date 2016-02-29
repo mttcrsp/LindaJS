@@ -5,7 +5,6 @@
 const expect = require('expect');
 
 const Space = require('../src/Space');
-
 const Pattern = require('../src/Pattern');
 
 describe('Space', function() {
@@ -57,7 +56,6 @@ describe('Space', function() {
     describe('createAgent()', function () {
         it('should create an agent able to work on this space', function (done) {
             const agent = space.createAgent();
-
             agent.out(t1, function () {
                 expect(space.tuples.length).toEqual(1);
                 done();
@@ -66,18 +64,16 @@ describe('Space', function() {
     });
 
     describe('match(pattern, callback)', function () {
-        it('should match with tuples that are already avalable', function (done) {
+        it('should match with tuples that are already available', function (done) {
             space.add(t1);
 
-            const agent = space.createAgent();
-            agent.rd(pattern, function (error, tuple) {
-                expect(tuple).toExist();
-                expect(error).toNotExist();
+            space.match(pattern, function (result) {
+                expect(result).toBe(t1);
                 done();
             });
         });
 
-        it('should match with tuples that are not yet avalable', function (done) {
+        it('should match with tuples that are not yet available', function (done) {
             setTimeout(function () {
                 space.add(t1);
             }, 100);
