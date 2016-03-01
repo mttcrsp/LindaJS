@@ -11,8 +11,11 @@ describe('Agent', function () {
     let space = new Space();
     let agent = space.createAgent();
 
-    const tuple = [1, 2, 3];
     const pattern = new Pattern(1, 2, 3);
+    const tuple = [1, 2, 3];
+    const activeTuple = [1, function (callback) {
+        callback(undefined, 'something');
+    }];
 
     beforeEach(function () {
         space = new Space();
@@ -97,12 +100,7 @@ describe('Agent', function () {
 
     describe('eval(activeTuple, callback)', function () {
         it('should evaluate and add an active tuple to the space', function (done) {
-            const asyncFunc = function (callback) {
-                callback(undefined, 'something');
-            };
-            const activeTuple = [1, asyncFunc];
             agent.eval(activeTuple, function (error, passiveTuple) {
-                console.log(error, passiveTuple);
                 expect(error).toNotExist();
                 expect(passiveTuple[0]).toEqual(1);
                 expect(passiveTuple[1]).toEqual('something');
@@ -110,6 +108,15 @@ describe('Agent', function () {
                 expect(space.tuples[0][1]).toEqual('something');
                 done();
             });
+        });
+
+        it('should work asynchronously', function (done) {
+            agent.eval(activeTuple, function (error, passiveTuple) {
+                expect(error).toNotExist();
+                expect(passiveTuple).toExist();
+                done();
+            });
+            expect(space.tuples.length).toEqual(0);
         });
     });
 });
