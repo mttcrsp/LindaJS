@@ -35,7 +35,7 @@ describe('Agent', function () {
         });
     });
 
-    describe('out(tuple, callback)', function () {
+    describe('#out(tuple, callback)', function () {
         it('should add a tuple to the space', function (done) {
             agent.out(tuple, function (error) {
                 expect(error).toNotExist();
@@ -45,7 +45,7 @@ describe('Agent', function () {
         });
     });
 
-    describe('rd(pattern, callback)', function () {
+    describe('#rd(pattern, callback)', function () {
         it('should return a tuple if the tuple is already in the space without removing it', function (done) {
             space.add(tuple);
 
@@ -72,7 +72,7 @@ describe('Agent', function () {
         });
     });
 
-    describe('in(pattern, callback)', function () {
+    describe('#in(pattern, callback)', function () {
         it('should return a tuple if the tuple is already in the space and then delete it', function (done) {
             space.add(tuple);
 
@@ -98,7 +98,7 @@ describe('Agent', function () {
         });
     });
 
-    describe('eval(activeTuple, callback)', function () {
+    describe('#eval(activeTuple, callback)', function () {
         it('should evaluate and add an active tuple to the space', function (done) {
             agent.eval(activeTuple, function (error, passiveTuple) {
                 expect(error).toNotExist();

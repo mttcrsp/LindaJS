@@ -7,7 +7,7 @@ const expect = require('expect');
 const Pattern = require('../src/Pattern');
 
 describe('Pattern', function () {
-    describe('match(tuple)', function () {
+    describe('#match(tuple)', function () {
         it('should match tuples that do match', function () {
             const pattern = new Pattern(1, 'something', 3);
             expect(

@@ -19,7 +19,7 @@ describe('Space', function() {
         space = new Space();
     });
 
-    describe('add(tuple)', function () {
+    describe('#add(tuple)', function () {
         it('should add tuples', function () {
             space.add(t1);
             space.add(t2);
@@ -35,7 +35,7 @@ describe('Space', function() {
         });
     });
 
-    describe('remove(tuple)', function () {
+    describe('#remove(tuple)', function () {
         it('should remove tuples', function () {
             space.add(t1);
             space.add(t2);
@@ -53,7 +53,7 @@ describe('Space', function() {
         });
     });
 
-    describe('createAgent()', function () {
+    describe('#createAgent()', function () {
         it('should create an agent able to work on this space', function (done) {
             const agent = space.createAgent();
             agent.out(t1, function () {
@@ -63,7 +63,7 @@ describe('Space', function() {
         });
     });
 
-    describe('match(pattern, callback)', function () {
+    describe('#match(pattern, callback)', function () {
         it('should match with tuples that are already available', function (done) {
             space.add(t1);
 
