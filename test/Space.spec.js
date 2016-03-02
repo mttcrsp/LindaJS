@@ -19,6 +19,23 @@ describe('Space', function() {
         space = new Space();
     });
 
+    describe('#constructor(tuples)', function () {
+        it('should error if the provided value is not a array of tuples', function () {
+            expect(function () {
+                space = new Space(1);
+            }).toThrow();
+
+            expect(function () {
+                space = new Space([1, 2, 3]);
+            }).toThrow();
+        });
+
+        it('should correctly initialize the tuples space if an initial value is provided', function () {
+            space = new Space([[1], ['something', 9]]);
+            expect(space.tuples).toBe(space.tuples);
+        });
+    });
+
     describe('#add(tuple)', function () {
         it('should add tuples', function () {
             space.add(t1);
