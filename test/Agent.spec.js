@@ -5,13 +5,12 @@
 const expect = require('expect');
 
 const Space = require('../src/Space');
-const Pattern = require('../src/Pattern');
 
 describe('Agent', function () {
     let space = new Space();
     let agent = space.createAgent();
 
-    const pattern = new Pattern(1, 2, 3);
+    const pattern = [1, 2, 3];
     const tuple = [1, 2, 3];
     const activeTuple = [1, function (callback) {
         callback(undefined, 'something');

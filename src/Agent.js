@@ -2,6 +2,8 @@
 
 const async = require('async');
 
+const Pattern = require('./Pattern');
+
 const UNAUTHORIZED_ERROR = new Error('This agent is still waiting for a\
  response to one a previosly requested operation. Retry after the previous\
  operation will be completed');
@@ -16,7 +18,8 @@ Agent.prototype._out = function (tuple, callback) {
     callback();
 };
 
-Agent.prototype._rd = function (pattern, callback) {
+Agent.prototype._rd = function (patternArray, callback) {
+    const pattern = new Pattern(...patternArray);
     const that = this;
     this.blocked = true;
     setImmediate(function () {
@@ -27,7 +30,8 @@ Agent.prototype._rd = function (pattern, callback) {
     });
 };
 
-Agent.prototype._in = function (pattern, callback) {
+Agent.prototype._in = function (patternArray, callback) {
+    const pattern = new Pattern(...patternArray);
     const that = this;
     this.blocked = true;
     setImmediate(function () {
