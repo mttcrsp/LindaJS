@@ -91,7 +91,6 @@
         "eol-last": 2,
         "key-spacing": [2,{"afterColon":true}],
         "max-nested-callbacks": [1,2],
-        "new-cap": 2,
         "no-array-constructor": 2,
         "no-lonely-if": 2,
         "no-nested-ternary": 1,

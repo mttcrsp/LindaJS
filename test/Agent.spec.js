@@ -7,28 +7,26 @@ const expect = require('expect');
 const Space = require('../src/Space');
 
 describe('Agent', function () {
-    let space = new Space();
+    let space = Space();
     let agent = space.createAgent();
 
     const pattern = [1, 2, 3];
     const tuple = [1, 2, 3];
+
     const activeTuple = [1, function (callback) {
         callback(undefined, 'something');
     }];
 
     beforeEach(function () {
-        space = new Space();
+        space = Space();
         agent = space.createAgent();
     });
 
-    it('should start out not blocked', function () {
-        expect(agent.blocked).toBe(false);
-    });
-
     it('should not be able to operate on the space while blocked', function (done) {
-        agent.blocked = true;
-
-        agent.out([1, 2, 3], function (error) {
+        // Given that the space is empty this operation should block the agent
+        agent.in(pattern, function () {});
+        
+        agent.out(tuple, function (error) {
             expect(error).toExist();
             done();
         });
@@ -38,7 +36,7 @@ describe('Agent', function () {
         it('should add a tuple to the space', function (done) {
             agent.out(tuple, function (error) {
                 expect(error).toNotExist();
-                expect(space.tuples.length).toEqual(1);
+                expect(space.tuples().length).toEqual(1);
                 done();
             });
         });
@@ -52,7 +50,7 @@ describe('Agent', function () {
                 expect(error).toNotExist();
                 expect(result).toBe(tuple);
                 expect(
-                    space.tuples.indexOf(tuple)
+                    space.tuples().indexOf(tuple)
                 ).toBe(0);
                 done();
             });
@@ -78,7 +76,7 @@ describe('Agent', function () {
             agent.in(pattern, function (error, result) {
                 expect(error).toNotExist();
                 expect(result).toBe(tuple);
-                expect(space.tuples.length).toEqual(0);
+                expect(space.tuples().length).toEqual(0);
                 done();
             });
         });
@@ -91,7 +89,7 @@ describe('Agent', function () {
             agent.in(pattern, function (error, result) {
                 expect(error).toNotExist();
                 expect(result).toBe(tuple);
-                expect(space.tuples.length).toEqual(0);
+                expect(space.tuples().length).toEqual(0);
                 done();
             });
         });
@@ -104,7 +102,7 @@ describe('Agent', function () {
             agent.inp(pattern, function (error, result) {
                 expect(error).toNotExist();
                 expect(result).toBe(tuple);
-                expect(space.tuples.length).toEqual(0);
+                expect(space.tuples().length).toEqual(0);
                 done();
             });
         });
@@ -128,8 +126,8 @@ describe('Agent', function () {
                 expect(error).toNotExist();
                 expect(passiveTuple[0]).toEqual(1);
                 expect(passiveTuple[1]).toEqual('something');
-                expect(space.tuples[0][0]).toEqual(1);
-                expect(space.tuples[0][1]).toEqual('something');
+                expect(space.tuples()[0][0]).toEqual(1);
+                expect(space.tuples()[0][1]).toEqual('something');
                 done();
             });
         });
@@ -140,7 +138,7 @@ describe('Agent', function () {
                 expect(passiveTuple).toExist();
                 done();
             });
-            expect(space.tuples.length).toEqual(0);
+            expect(space.tuples().length).toEqual(0);
         });
     });
 });

@@ -4,134 +4,105 @@ const async = require('async');
 
 const Pattern = require('./Pattern');
 
-const UNAUTHORIZED_ERROR = new Error('This agent is still waiting for a\
+const UNAUTHORIZED_ERROR = Error('This agent is still waiting for a\
  response to one a previosly requested operation. Retry after the previous\
  operation will be completed');
 
-function Agent (space) {
-    this.space = space;
-    this.blocked = false;
-}
+function Agent (_space) {
+    const space = _space;
+    let blocked = false;
 
-Agent.prototype._out = function (tuple, callback) {
-    this.space.add(tuple);
-    callback();
-};
-
-Agent.prototype._rd = function (patternArray, callback) {
-    const pattern = new Pattern(...patternArray);
-    const that = this;
-    this.blocked = true;
-    setImmediate(function () {
-        that.space.match(pattern, function (tuple) {
-            that.blocked = false;
-            callback(undefined, tuple);
-        });
-    });
-};
-
-Agent.prototype._in = function (patternArray, callback) {
-    const pattern = new Pattern(...patternArray);
-    const that = this;
-    this.blocked = true;
-    setImmediate(function () {
-        that.space.match(pattern, function (tuple) {
-            that.blocked = false;
-            that.space.remove(tuple);
-            callback(undefined, tuple);
-        });
-    });
-};
-
-Agent.prototype._rdp = function (patternArray, callback) {
-    const pattern = new Pattern(...patternArray);
-    const that = this;
-    this.blocked = true;
-    setImmediate(function () {
-        that.space.verify(pattern, function (tuple) {
-            that.blocked = false;
-            callback(undefined, tuple);
-        });
-    });
-};
-
-Agent.prototype._inp = function (patternArray, callback) {
-    const pattern = new Pattern(...patternArray);
-    const that = this;
-    this.blocked = true;
-    setImmediate(function () {
-        that.space.verify(pattern, function (tuple) {
-            that.blocked = false;
-            that.space.remove(tuple);
-            callback(undefined, tuple);
-        });
-    });
-};
-
-Agent.prototype._eval = function (activeTuple, callback) {
-    const that = this;
-    setImmediate(function () {
-        async.map(
-            activeTuple,
-            /*eslint-disable no-shadow*/
-            function (element, callback) {
-            /*eslint-enable no-shadow*/
-                if (typeof element !== 'function') {
-                    return callback(undefined, element);
-                }
-                element(callback);
-            },
-            function (error, passiveTuple) {
-                if (error) {
-                    return callback(error);
-                }
-                that.space.add(passiveTuple);
-                callback(undefined, passiveTuple);
+    const authorize = function (operation) {
+        return function (argument, callback) {
+            if (blocked) {
+                return callback(UNAUTHORIZED_ERROR);
             }
-        );
-    });
-};
+            operation(argument, callback);
+        };
+    };
 
-Agent.prototype.out = function (tuple, callback) {
-    if (this.blocked) {
-        return callback(UNAUTHORIZED_ERROR);
-    }
-    this._out(tuple, callback);
-};
+    const out = function (tuple, callback) {
+        space.add(tuple);
+        callback();
+    };
 
-Agent.prototype.rd = function (pattern, callback) {
-    if (this.blocked) {
-        return callback(UNAUTHORIZED_ERROR);
-    }
-    this._rd(pattern, callback);
-};
+    const _eval = function (activeTuple, callback) {
+        setImmediate(function () {
+            async.map(
+                activeTuple,
+                /*eslint-disable no-shadow*/
+                function (element, callback) {
+                /*eslint-enable no-shadow*/
+                    if (typeof element !== 'function') {
+                        return callback(undefined, element);
+                    }
+                    element(callback);
+                },
+                function (error, passiveTuple) {
+                    if (error) {
+                        return callback(error);
+                    }
+                    space.add(passiveTuple);
+                    callback(undefined, passiveTuple);
+                }
+            );
+        });
+    };
 
-Agent.prototype.in = function (pattern, callback) {
-    if (this.blocked) {
-        return callback(UNAUTHORIZED_ERROR);
-    }
-    this._in(pattern, callback);
-};
+    const rd = function (patternArray, callback) {
+        const pattern = Pattern(...patternArray);
+        blocked = true;
+        setImmediate(function () {
+            space.match(pattern, function (tuple) {
+                blocked = false;
+                callback(undefined, tuple);
+            });
+        });
+    };
 
-Agent.prototype.eval = function (activeTuple, callback) {
-    if (this.blocked) {
-        return callback(UNAUTHORIZED_ERROR);
-    }
-    this._eval(activeTuple, callback);
-};
+    const _in = function (patternArray, callback) {
+        const pattern = Pattern(...patternArray);
+        blocked = true;
+        setImmediate(function () {
+            space.match(pattern, function (tuple) {
+                blocked = false;
+                space.remove(tuple);
+                callback(undefined, tuple);
+            });
+        });
+    };
 
-Agent.prototype.rdp = function (pattern, callback) {
-    if (this.blocked) {
-        return callback(UNAUTHORIZED_ERROR);
-    }
-    this._rdp(pattern, callback);
-};
+    const rdp = function (patternArray, callback) {
+        const pattern = Pattern(...patternArray);
+        blocked = true;
+        setImmediate(function () {
+            space.verify(pattern, function (tuple) {
+                blocked = false;
+                callback(undefined, tuple);
+            });
+        });
+    };
 
-Agent.prototype.inp = function (pattern, callback) {
-    if (this.blocked) {
-        return callback(UNAUTHORIZED_ERROR);
-    }
-    this._inp(pattern, callback);
-};
+    const inp = function (patternArray, callback) {
+        const pattern = Pattern(...patternArray);
+        blocked = true;
+        setImmediate(function () {
+            space.verify(pattern, function (tuple) {
+                blocked = false;
+                space.remove(tuple);
+                callback(undefined, tuple);
+            });
+        });
+    };
+
+    return {
+        out: authorize(out),
+        rd: authorize(rd),
+        in: authorize(_in),
+        rdp: authorize(rdp),
+        inp: authorize(inp),
+        eval: authorize(_eval)
+    };
+}
 
 module.exports = Agent;

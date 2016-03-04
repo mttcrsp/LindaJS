@@ -13,26 +13,26 @@ describe('Space', function() {
     const tuple = [1, 2, 3];
     const otherTuple = [3, 4, 5];
 
-    const pattern = new Pattern(1, 2, 3);
+    const pattern = Pattern(1, 2, 3);
 
     beforeEach(function () {
-        space = new Space();
+        space = Space();
     });
 
     describe('#constructor(tuples)', function () {
         it('should error if the provided value is not a array of tuples', function () {
             expect(function () {
-                space = new Space(1);
+                space = Space(1);
             }).toThrow();
 
             expect(function () {
-                space = new Space([1, 2, 3]);
+                space = Space([1, 2, 3]);
             }).toThrow();
         });
 
         it('should correctly initialize the tuples space if an initial value is provided', function () {
-            space = new Space([[1], ['something', 9]]);
-            expect(space.tuples).toBe(space.tuples);
+            space = Space([tuple, otherTuple]);
+            expect(space.tuples().length).toEqual(2);
         });
     });
 
@@ -41,14 +41,14 @@ describe('Space', function() {
             space.add(tuple);
             space.add(otherTuple);
 
-            expect(space.tuples.length).toEqual(2);
+            expect(space.tuples().length).toEqual(2);
         });
 
         it('should add duplicated tuples', function () {
             space.add(tuple);
             space.add(tuple);
 
-            expect(space.tuples.length).toEqual(2);
+            expect(space.tuples().length).toEqual(2);
         });
     });
 
@@ -58,7 +58,7 @@ describe('Space', function() {
             space.add(otherTuple);
             space.remove(tuple);
 
-            expect(space.tuples[0]).toEqual(otherTuple);
+            expect(space.tuples()[0]).toEqual(otherTuple);
         });
 
         it('should remove duplicated tuples only once', function () {
@@ -66,7 +66,7 @@ describe('Space', function() {
             space.add(tuple);
             space.remove(tuple);
 
-            expect(space.tuples.length).toEqual(1);
+            expect(space.tuples().length).toEqual(1);
         });
     });
 
@@ -136,7 +136,7 @@ describe('Space', function() {
         it('should create an agent able to work on this space', function (done) {
             const agent = space.createAgent();
             agent.out(tuple, function () {
-                expect(space.tuples.length).toEqual(1);
+                expect(space.tuples().length).toEqual(1);
                 done();
             });
         });
