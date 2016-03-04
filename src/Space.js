@@ -52,13 +52,22 @@ Space.prototype.remove = function (tuple) {
     this.tuples.splice(index, 1);
 };
 
+Space.prototype.find = function (pattern) {
+    return this.tuples.find(
+        pattern.match.bind(pattern)
+    );
+};
+
+Space.prototype.verify = function (pattern, callback) {
+    const tuple = this.find(pattern);
+    callback(tuple);
+};
+
 Space.prototype.match = function (pattern, callback) {
     // If a tuple that matches the specified pattern can not be found in the
     // space at the moment register the callback to retry matching the pattern
     // when a new tuple is added.
-    const tuple = this.tuples.find(
-        pattern.match.bind(pattern)
-    );
+    const tuple = this.find(pattern);
     if (tuple !== undefined) {
         return callback(tuple);
     }

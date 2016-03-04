@@ -43,6 +43,31 @@ Agent.prototype._in = function (patternArray, callback) {
     });
 };
 
+Agent.prototype._rdp = function (patternArray, callback) {
+    const pattern = new Pattern(...patternArray);
+    const that = this;
+    this.blocked = true;
+    setImmediate(function () {
+        that.space.verify(pattern, function (tuple) {
+            that.blocked = false;
+            callback(undefined, tuple);
+        });
+    });
+};
+
+Agent.prototype._inp = function (patternArray, callback) {
+    const pattern = new Pattern(...patternArray);
+    const that = this;
+    this.blocked = true;
+    setImmediate(function () {
+        that.space.verify(pattern, function (tuple) {
+            that.blocked = false;
+            that.space.remove(tuple);
+            callback(undefined, tuple);
+        });
+    });
+};
+
 Agent.prototype._eval = function (activeTuple, callback) {
     const that = this;
     setImmediate(function () {
@@ -93,6 +118,20 @@ Agent.prototype.eval = function (activeTuple, callback) {
         return callback(UNAUTHORIZED_ERROR);
     }
     this._eval(activeTuple, callback);
+};
+
+Agent.prototype.rdp = function (pattern, callback) {
+    if (this.blocked) {
+        return callback(UNAUTHORIZED_ERROR);
+    }
+    this._rdp(pattern, callback);
+};
+
+Agent.prototype.inp = function (pattern, callback) {
+    if (this.blocked) {
+        return callback(UNAUTHORIZED_ERROR);
+    }
+    this._inp(pattern, callback);
 };
 
 module.exports = Agent;

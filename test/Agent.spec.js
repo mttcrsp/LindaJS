@@ -97,6 +97,31 @@ describe('Agent', function () {
         });
     });
 
+    describe('#inp(pattern, callback)', function () {
+        it('should return a tuple if the tuple is already in the space and then delete it', function (done) {
+            space.add(tuple);
+
+            agent.inp(pattern, function (error, result) {
+                expect(error).toNotExist();
+                expect(result).toBe(tuple);
+                expect(space.tuples.length).toEqual(0);
+                done();
+            });
+        });
+
+        it('should not return a tuple if the tuple is not in the space and is added at a later moment', function (done) {
+            setTimeout(function () {
+                space.add(tuple);
+            }, 100);
+
+            agent.inp(pattern, function (error, result) {
+                expect(error).toNotExist();
+                expect(result).toNotExist();
+                done();
+            });
+        });
+    });
+
     describe('#eval(activeTuple, callback)', function () {
         it('should evaluate and add an active tuple to the space', function (done) {
             agent.eval(activeTuple, function (error, passiveTuple) {
