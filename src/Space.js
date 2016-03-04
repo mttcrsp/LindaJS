@@ -30,7 +30,7 @@ Array.isArrayOfArrays = function (o) {
     );
 };
 
-function Space (_tuples) {
+const Space = _tuples => {
     if (
         _tuples !== undefined &&
         !Array.isArrayOfArrays(_tuples)
@@ -41,7 +41,7 @@ function Space (_tuples) {
     const tuples = _tuples || [];
     const emitter = new EventEmitter();
 
-    const find = function (pattern) {
+    const find = pattern => {
         return tuples.find(
             pattern.match.bind(pattern)
         );
@@ -74,7 +74,7 @@ function Space (_tuples) {
                 return callback(tuple);
             }
             /*eslint-disable no-shadow*/
-            const tryMatchingWithNewTuple = function (tuple) {
+            const tryMatchingWithNewTuple = tuple => {
             /*eslint-enable no-shadow*/
                 if (!pattern.match(tuple)) {
                     return;

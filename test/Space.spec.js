@@ -21,11 +21,11 @@ describe('Space', function() {
 
     describe('#constructor(tuples)', function () {
         it('should error if the provided value is not a array of tuples', function () {
-            expect(function () {
+            expect(() => {
                 space = Space(1);
             }).toThrow();
 
-            expect(function () {
+            expect(() => {
                 space = Space([1, 2, 3]);
             }).toThrow();
         });
@@ -92,18 +92,18 @@ describe('Space', function() {
         it('should match with tuples that are already available', function (done) {
             space.add(tuple);
 
-            space.verify(pattern, function (result) {
+            space.verify(pattern, (result) => {
                 expect(result).toBe(tuple);
                 done();
             });
         });
 
         it('should not match with tuples that are not yet available', function (done) {
-            setTimeout(function () {
+            setTimeout(() => {
                 space.add(tuple);
             }, 100);
 
-            space.verify(pattern, function (result) {
+            space.verify(pattern, (result) => {
                 expect(result).toNotExist();
                 done();
             });
@@ -114,18 +114,18 @@ describe('Space', function() {
         it('should match with tuples that are already available', function (done) {
             space.add(tuple);
 
-            space.match(pattern, function (result) {
+            space.match(pattern, (result) => {
                 expect(result).toBe(tuple);
                 done();
             });
         });
 
         it('should match with tuples that are not yet available', function (done) {
-            setTimeout(function () {
+            setTimeout(() => {
                 space.add(tuple);
             }, 100);
 
-            space.match(pattern, function (result) {
+            space.match(pattern, (result) => {
                 expect(result).toBe(tuple);
                 done();
             });
@@ -135,7 +135,7 @@ describe('Space', function() {
     describe('#createAgent()', function () {
         it('should create an agent able to work on this space', function (done) {
             const agent = space.createAgent();
-            agent.out(tuple, function () {
+            agent.out(tuple, () => {
                 expect(space.tuples().length).toEqual(1);
                 done();
             });

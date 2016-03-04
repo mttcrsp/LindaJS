@@ -13,7 +13,7 @@ describe('Agent', function () {
     const pattern = [1, 2, 3];
     const tuple = [1, 2, 3];
 
-    const activeTuple = [1, function (callback) {
+    const activeTuple = [1, callback => {
         callback(undefined, 'something');
     }];
 
@@ -24,9 +24,9 @@ describe('Agent', function () {
 
     it('should not be able to operate on the space while blocked', function (done) {
         // Given that the space is empty this operation should block the agent
-        agent.in(pattern, function () {});
-        
-        agent.out(tuple, function (error) {
+        agent.in(pattern, () => {});
+
+        agent.out(tuple, error => {
             expect(error).toExist();
             done();
         });
@@ -34,7 +34,7 @@ describe('Agent', function () {
 
     describe('#out(tuple, callback)', function () {
         it('should add a tuple to the space', function (done) {
-            agent.out(tuple, function (error) {
+            agent.out(tuple, (error) => {
                 expect(error).toNotExist();
                 expect(space.tuples().length).toEqual(1);
                 done();
@@ -46,7 +46,7 @@ describe('Agent', function () {
         it('should return a tuple if the tuple is already in the space without removing it', function (done) {
             space.add(tuple);
 
-            agent.rd(pattern, function (error, result) {
+            agent.rd(pattern, (error, result) => {
                 expect(error).toNotExist();
                 expect(result).toBe(tuple);
                 expect(
@@ -57,11 +57,11 @@ describe('Agent', function () {
         });
 
         it('should return a tuple also when the tuple is added later to the space', function (done) {
-            setTimeout(function () {
+            setTimeout(() => {
                 space.add(tuple);
             }, 100);
 
-            agent.rd(pattern, function (error, result) {
+            agent.rd(pattern, (error, result) => {
                 expect(error).toNotExist();
                 expect(result).toBe(tuple);
                 done();
@@ -73,7 +73,7 @@ describe('Agent', function () {
         it('should return a tuple if the tuple is already in the space and then delete it', function (done) {
             space.add(tuple);
 
-            agent.in(pattern, function (error, result) {
+            agent.in(pattern, (error, result) => {
                 expect(error).toNotExist();
                 expect(result).toBe(tuple);
                 expect(space.tuples().length).toEqual(0);
@@ -82,11 +82,11 @@ describe('Agent', function () {
         });
 
         it('should return a tuple and delete it from the space also when the tuple is added at a later moment', function (done) {
-            setTimeout(function () {
+            setTimeout(() => {
                 space.add(tuple);
             }, 100);
 
-            agent.in(pattern, function (error, result) {
+            agent.in(pattern, (error, result) => {
                 expect(error).toNotExist();
                 expect(result).toBe(tuple);
                 expect(space.tuples().length).toEqual(0);
@@ -99,7 +99,7 @@ describe('Agent', function () {
         it('should return a tuple if the tuple is already in the space and then delete it', function (done) {
             space.add(tuple);
 
-            agent.inp(pattern, function (error, result) {
+            agent.inp(pattern, (error, result) => {
                 expect(error).toNotExist();
                 expect(result).toBe(tuple);
                 expect(space.tuples().length).toEqual(0);
@@ -108,11 +108,11 @@ describe('Agent', function () {
         });
 
         it('should not return a tuple if the tuple is not in the space and is added at a later moment', function (done) {
-            setTimeout(function () {
+            setTimeout(() => {
                 space.add(tuple);
             }, 100);
 
-            agent.inp(pattern, function (error, result) {
+            agent.inp(pattern, (error, result) => {
                 expect(error).toNotExist();
                 expect(result).toNotExist();
                 done();
@@ -122,7 +122,7 @@ describe('Agent', function () {
 
     describe('#eval(activeTuple, callback)', function () {
         it('should evaluate and add an active tuple to the space', function (done) {
-            agent.eval(activeTuple, function (error, passiveTuple) {
+            agent.eval(activeTuple, (error, passiveTuple) => {
                 expect(error).toNotExist();
                 expect(passiveTuple[0]).toEqual(1);
                 expect(passiveTuple[1]).toEqual('something');
@@ -133,7 +133,7 @@ describe('Agent', function () {
         });
 
         it('should work asynchronously', function (done) {
-            agent.eval(activeTuple, function (error, passiveTuple) {
+            agent.eval(activeTuple, (error, passiveTuple) => {
                 expect(error).toNotExist();
                 expect(passiveTuple).toExist();
                 done();
