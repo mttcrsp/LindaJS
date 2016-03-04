@@ -5,31 +5,6 @@ const Agent = require('./Agent');
 
 const NEW_TUPLE_EVENT = 'newTuple';
 
-Array.prototype.find = function (predicate) {
-    for (let i = 0; i < this.length; i++) {
-        if (predicate(this[i])) {
-            return this[i];
-        }
-    }
-    return undefined;
-};
-
-Array.prototype.every = function (predicate) {
-    for (let i = 0; i < this.length; i++) {
-        if (!predicate(this[i])) {
-            return false;
-        }
-    }
-    return true;
-};
-
-Array.isArrayOfArrays = function (o) {
-    return (
-        Array.isArray(o) &&
-        o.every(Array.isArray)
-    );
-};
-
 const Space = _tuples => {
     if (
         _tuples !== undefined &&
@@ -88,10 +63,34 @@ const Space = _tuples => {
             emitter.on(NEW_TUPLE_EVENT, tryMatchingWithNewTuple);
         },
         createAgent () {
-            const agent = Agent(this);
-            return agent;
+            return Agent(this);
         }
     };
-}
+};
+
+Array.prototype.find = function (predicate) {
+    for (let i = 0; i < this.length; i++) {
+        if (predicate(this[i])) {
+            return this[i];
+        }
+    }
+    return undefined;
+};
+
+Array.prototype.every = function (predicate) {
+    for (let i = 0; i < this.length; i++) {
+        if (!predicate(this[i])) {
+            return false;
+        }
+    }
+    return true;
+};
+
+Array.isArrayOfArrays = function (o) {
+    return (
+        Array.isArray(o) &&
+        o.every(Array.isArray)
+    );
+};
 
 module.exports = Space;
