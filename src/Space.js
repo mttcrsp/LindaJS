@@ -5,7 +5,7 @@ const Agent = require('./Agent');
 
 const NEW_TUPLE_EVENT = 'newTuple';
 
-const Space = _tuples => {
+const Space = (_tuples, validators) => {
     if (
         _tuples !== undefined &&
         !Array.isArrayOfArrays(_tuples)
@@ -28,6 +28,13 @@ const Space = _tuples => {
             return tuples.slice();
         },
         add (tuple) {
+            const isValidTuple = validators.every(
+                validator => validator(tuple)
+            );
+            if (!isValidTuple) {
+                throw TypeError('The tuple was rejected by some validator\
+                function');
+            }
             tuples.push(tuple);
             emitter.emit(NEW_TUPLE_EVENT, tuple);
         },
