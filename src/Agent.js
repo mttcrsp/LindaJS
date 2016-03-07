@@ -10,6 +10,28 @@ const UNAUTHORIZED_ERROR = Error('This agent is still waiting for a\
 
 const Agent = _space => {
     const space = _space;
+    // The Linda specifications prescribe in and rd operations to block the
+    // caller and inp and rdp operations to be non blocking. This clearly does
+    // not match the Node model of execution: no operation should ever block.
+    // However when you really think about it the essential difference between
+    // this two kind of operations is that the first one is guaranteed to
+    // return a matching tuple (maybe after a while but surely will) while the
+    // second one does not guarantee that a matching tuple is returned to the
+    // caller (it returns a tuple if matching one is already inside the space,
+    // but if there's no matching tuple in the space it does not return
+    // anything).
+    // Based on this idea this implementation of the Linda model implements
+    // operations this way:
+    // - p operations search the space and immediatly invoke the callback with
+    // a tuple matching the pattern or undefined if no tuple matching the
+    // pattern is found is found;
+    // - non-p operations 'block' waiting for a matching tuple to be added to
+    // the space before returning.
+    // In this context 'blocking' does not actually mean that the whole
+    // process is blocked, it means that the agent won't be able to operate on
+    // the space until a matching tuple is found in the space and the
+    // requested operation will complete (from a practical standpoint until
+    // the provided callback won't be invoked by the space).
     let blocked = false;
 
     const out = (tuple, callback) => {
@@ -17,6 +39,13 @@ const Agent = _space => {
         callback();
     };
 
+    // The Linda guidelines descrive an active tuple as a set of functions
+    // that will be evaluated and become a passive tuple. Thus I decided to
+    // model an active tuple as an array of functions that will be invoked
+    // passing a callback as an argument. The role of each function is to
+    // compute it's value and invoke the callback with the result of their
+    // computation, or an error if for some reason they were not able to
+    // complete their computation.
     const _eval = (activeTuple, callback) => {
         setImmediate(() => {
             async.map(
@@ -43,11 +72,11 @@ const Agent = _space => {
     // In, inp, rd, rdp all follow the same pattern of execution. They all
     // schedule the search for a tuple matching the provided pattern and call
     // the callback function. They differ in the way that the search works (p
-    // vs non-p)and whether they remove the matching tuple from the space or
-    // not (in* vs rd*). (non-p operations search the space and immediatly
-    // return while p operations block waiting for a matching tuple before
-    // returning). This function builds an operation based on this two
-    // different parameters that should be specified
+    // vs non-p) and whether they required the removal the matching tuple from
+    // the space or not (in* vs rd*). This function builds an operation based
+    // on this two different parameters that should be specified: the way in
+    // which the operation should search the space (blocking/non blocking) and
+    // whether the matched tuple should be removed.
     const operation = (searchSpace, shouldRemove) => {
         return (patternArray, callback) => {
             const pattern = Pattern(...patternArray);
@@ -87,6 +116,7 @@ const Agent = _space => {
     // and transforming them to valid authorized operations.
     /*eslint-disable no-shadow*/
     const authorize = operation => {
+    /*eslint-enable no-shadow*/
         return (argument, callback) => {
             if (blocked) {
                 return callback(UNAUTHORIZED_ERROR);

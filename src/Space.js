@@ -36,6 +36,14 @@ const Space = _tuples => {
             tuples.splice(index, 1);
         },
         find,
+        // This two functions implement the two necessary search types, non
+        // blocking and blocking:
+        // - Verify verifies if a tuple matching the provided predicate can be
+        // found in the space and immediately invokes the callback with a
+        // matching tuple or undefined if no matching tuple can be found.
+        // - Match looks for a matching tuple indefinetly and invokes the
+        // callback when one it is found. Look below to see the details of how
+        // this indefinitely running search is implemented.
         verify (pattern, callback) {
             const tuple = find(pattern);
             callback(tuple);
