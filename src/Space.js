@@ -23,7 +23,7 @@ const Space = _tuples => {
     };
 
     return {
-        tuples () {
+        getTuples () {
             // Fastest way to clone an array
             return tuples.slice();
         },

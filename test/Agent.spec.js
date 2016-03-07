@@ -36,7 +36,7 @@ describe('Agent', function () {
         it('should add a tuple to the space', function (done) {
             agent.out(tuple, (error) => {
                 expect(error).toNotExist();
-                expect(space.tuples().length).toEqual(1);
+                expect(space.getTuples().length).toEqual(1);
                 done();
             });
         });
@@ -50,7 +50,7 @@ describe('Agent', function () {
                 expect(error).toNotExist();
                 expect(result).toBe(tuple);
                 expect(
-                    space.tuples().indexOf(tuple)
+                    space.getTuples().indexOf(tuple)
                 ).toBe(0);
                 done();
             });
@@ -76,7 +76,7 @@ describe('Agent', function () {
             agent.in(pattern, (error, result) => {
                 expect(error).toNotExist();
                 expect(result).toBe(tuple);
-                expect(space.tuples().length).toEqual(0);
+                expect(space.getTuples().length).toEqual(0);
                 done();
             });
         });
@@ -89,7 +89,7 @@ describe('Agent', function () {
             agent.in(pattern, (error, result) => {
                 expect(error).toNotExist();
                 expect(result).toBe(tuple);
-                expect(space.tuples().length).toEqual(0);
+                expect(space.getTuples().length).toEqual(0);
                 done();
             });
         });
@@ -102,7 +102,7 @@ describe('Agent', function () {
             agent.inp(pattern, (error, result) => {
                 expect(error).toNotExist();
                 expect(result).toBe(tuple);
-                expect(space.tuples().length).toEqual(0);
+                expect(space.getTuples().length).toEqual(0);
                 done();
             });
         });
@@ -126,8 +126,8 @@ describe('Agent', function () {
                 expect(error).toNotExist();
                 expect(passiveTuple[0]).toEqual(1);
                 expect(passiveTuple[1]).toEqual('something');
-                expect(space.tuples()[0][0]).toEqual(1);
-                expect(space.tuples()[0][1]).toEqual('something');
+                expect(space.getTuples()[0][0]).toEqual(1);
+                expect(space.getTuples()[0][1]).toEqual('something');
                 done();
             });
         });
@@ -138,7 +138,7 @@ describe('Agent', function () {
                 expect(passiveTuple).toExist();
                 done();
             });
-            expect(space.tuples().length).toEqual(0);
+            expect(space.getTuples().length).toEqual(0);
         });
     });
 });

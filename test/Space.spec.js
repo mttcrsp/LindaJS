@@ -32,7 +32,7 @@ describe('Space', function() {
 
         it('should correctly initialize the tuples space if an initial value is provided', function () {
             space = Space([tuple, otherTuple]);
-            expect(space.tuples().length).toEqual(2);
+            expect(space.getTuples().length).toEqual(2);
         });
     });
 
@@ -41,14 +41,14 @@ describe('Space', function() {
             space.add(tuple);
             space.add(otherTuple);
 
-            expect(space.tuples().length).toEqual(2);
+            expect(space.getTuples().length).toEqual(2);
         });
 
         it('should add duplicated tuples', function () {
             space.add(tuple);
             space.add(tuple);
 
-            expect(space.tuples().length).toEqual(2);
+            expect(space.getTuples().length).toEqual(2);
         });
     });
 
@@ -58,7 +58,7 @@ describe('Space', function() {
             space.add(otherTuple);
             space.remove(tuple);
 
-            expect(space.tuples()[0]).toEqual(otherTuple);
+            expect(space.getTuples()[0]).toEqual(otherTuple);
         });
 
         it('should remove duplicated tuples only once', function () {
@@ -66,7 +66,7 @@ describe('Space', function() {
             space.add(tuple);
             space.remove(tuple);
 
-            expect(space.tuples().length).toEqual(1);
+            expect(space.getTuples().length).toEqual(1);
         });
     });
 
@@ -136,7 +136,7 @@ describe('Space', function() {
         it('should create an agent able to work on this space', function (done) {
             const agent = space.createAgent();
             agent.out(tuple, () => {
-                expect(space.tuples().length).toEqual(1);
+                expect(space.getTuples().length).toEqual(1);
                 done();
             });
         });
