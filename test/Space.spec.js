@@ -12,11 +12,13 @@ describe('Space', function() {
 
     const tuple = [1, 2, 3];
     const otherTuple = [3, 4, 5];
+    const invalidTuple = ['invalid', -1];
 
     const pattern = Pattern(1, 2, 3);
 
     beforeEach(function () {
-        space = Space();
+        const validators = [t => t[0] !== 'invalid'];
+        space = Space(undefined, validators);
     });
 
     describe('#constructor(tuples)', function () {
@@ -49,6 +51,13 @@ describe('Space', function() {
             space.add(tuple);
 
             expect(space.getTuples().length).toEqual(2);
+        });
+
+        it('should throw an error if the tuple is invalid and not add it to the space', function () {
+            expect(() => {
+                space.add(invalidTuple);
+            }).toThrow();
+            expect(space.tuples().length).toEqual(0);
         });
     });
 
