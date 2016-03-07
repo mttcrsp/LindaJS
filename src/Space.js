@@ -5,7 +5,7 @@ const Agent = require('./Agent');
 
 const NEW_TUPLE_EVENT = 'newTuple';
 
-const Space = (_tuples, validators) => {
+const Space = (_tuples, _validators) => {
     if (
         _tuples !== undefined &&
         !Array.isArrayOfArrays(_tuples)
@@ -14,6 +14,7 @@ const Space = (_tuples, validators) => {
          tuples (aka array of arrays).');
     }
     const tuples = _tuples || [];
+    const validators = _validators || [];
     const emitter = new EventEmitter();
 
     const find = pattern => {
