@@ -35,8 +35,12 @@ const Agent = _space => {
     let blocked = false;
 
     const out = (tuple, callback) => {
-        space.add(tuple);
-        callback();
+        try {
+            space.add(tuple);
+            return callback();
+        } catch (error) {
+            return callback(error);
+        }
     };
 
     // The Linda guidelines descrive an active tuple as a set of functions
@@ -62,8 +66,12 @@ const Agent = _space => {
                     if (error) {
                         return callback(error);
                     }
-                    space.add(passiveTuple);
-                    callback(undefined, passiveTuple);
+                    try {
+                        space.add(passiveTuple);
+                        return callback(undefined, passiveTuple);
+                    } catch (validationError) {
+                        return callback(validationError);
+                    }
                 }
             );
         });
