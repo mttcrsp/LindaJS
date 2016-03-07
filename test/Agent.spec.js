@@ -12,13 +12,16 @@ describe('Agent', function () {
 
     const pattern = [1, 2, 3];
     const tuple = [1, 2, 3];
+    const invalidTuple = ['invalid'];
 
     const activeTuple = [1, callback => {
         callback(undefined, 'something');
     }];
 
+    const validators = [t => t[0] !== 'invalid'];
+
     beforeEach(function () {
-        space = Space();
+        space = Space([], validators);
         agent = space.createAgent();
     });
 
@@ -37,6 +40,14 @@ describe('Agent', function () {
             agent.out(tuple, (error) => {
                 expect(error).toNotExist();
                 expect(space.tuples().length).toEqual(1);
+                done();
+            });
+        });
+
+        it('should not be able to add an invalid tuple to the space', function (done) {
+            agent.out(invalidTuple, error => {
+                expect(error).toExist();
+                expect(space.tuples().length).toEqual(0);
                 done();
             });
         });
