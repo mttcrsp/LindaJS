@@ -6,6 +6,7 @@ const expect = require('expect');
 
 const Space = require('../src/Space');
 const Pattern = require('../src/Pattern');
+const Worker = require('../src/Worker');
 
 describe('Space', function() {
     let space;
@@ -17,8 +18,12 @@ describe('Space', function() {
     const pattern = Pattern(1, 2, 3);
 
     beforeEach(function () {
-        const validators = [t => t[0] !== 'invalid'];
-        space = Space(undefined, validators);
+        const validator = Worker(
+            Worker.TYPE.VALIDATION,
+            t => t[0] !== 'invalid'
+        );
+        const workers = [validator];
+        space = Space(undefined, workers);
     });
 
     describe('#constructor(tuples)', function () {

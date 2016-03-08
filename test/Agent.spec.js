@@ -5,6 +5,7 @@
 const expect = require('expect');
 
 const Space = require('../src/Space');
+const Worker = require('../src/Worker');
 
 describe('Agent', function () {
     let space = Space();
@@ -18,10 +19,13 @@ describe('Agent', function () {
         callback(undefined, 'something');
     }];
 
-    const validators = [t => t[0] !== 'invalid'];
+    const validator = Worker(
+        Worker.TYPE.VALIDATION,
+        t => t[0] !== 'invalid'
+    );
 
     beforeEach(function () {
-        space = Space([], validators);
+        space = Space([], [validator]);
         agent = space.createAgent();
     });
 
