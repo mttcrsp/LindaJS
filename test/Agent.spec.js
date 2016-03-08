@@ -8,8 +8,7 @@ const Space = require('../src/Space');
 const Worker = require('../src/Worker');
 
 describe('Agent', function () {
-    let space = Space();
-    let agent = space.createAgent();
+    let space, agent;
 
     const pattern = [1, 2, 3];
     const tuple = [1, 2, 3];
