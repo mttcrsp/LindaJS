@@ -23,10 +23,10 @@ const Agent = _space => {
     // Based on this idea this implementation of the Linda model implements
     // operations this way:
     // - p operations search the space and immediatly invoke the callback with
-    // a tuple matching the pattern or undefined if no tuple matching the
-    // pattern is found is found;
+    //   a tuple matching the pattern or undefined if no tuple matching the
+    //   pattern is found is found;
     // - non-p operations 'block' waiting for a matching tuple to be added to
-    // the space before returning.
+    //   the space before returning.
     // In this context 'blocking' does not actually mean that the whole
     // process is blocked, it means that the agent won't be able to operate on
     // the space until a matching tuple is found in the space and the
@@ -92,7 +92,7 @@ const Agent = _space => {
             setImmediate(() => {
                 searchSpace(pattern, tuple => {
                     blocked = false;
-                    if (shouldRemove) {
+                    if (shouldRemove && tuple !== undefined) {
                         space.remove(tuple);
                     }
                     callback(undefined, tuple);
