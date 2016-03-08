@@ -47,7 +47,7 @@ describe('Agent', function () {
         it('should not be able to add an invalid tuple to the space', function (done) {
             agent.out(invalidTuple, error => {
                 expect(error).toExist();
-                expect(space.tuples().length).toEqual(0);
+                expect(space.getTuples().length).toEqual(0);
                 done();
             });
         });

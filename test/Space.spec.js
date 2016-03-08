@@ -57,7 +57,7 @@ describe('Space', function() {
             expect(() => {
                 space.add(invalidTuple);
             }).toThrow();
-            expect(space.tuples().length).toEqual(0);
+            expect(space.getTuples().length).toEqual(0);
         });
     });
 
