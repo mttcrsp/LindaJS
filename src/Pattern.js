@@ -25,6 +25,11 @@ function Pattern () {
             }
 
             return tuple;
+        },
+        isSubpattern (otherPattern) {
+            return (
+                otherPattern.match(pattern) !== undefined
+            );
         }
     };
 }
