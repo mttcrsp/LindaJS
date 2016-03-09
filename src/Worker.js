@@ -13,7 +13,7 @@ const TYPES = [
 ];
 
 const Worker = (type, work) => {
-    if (!TYPES.contains(type)) {
+    if (TYPES.indexOf(type) === -1) {
         throw new TypeError(type + 'is not a valid worker type.');
     }
 
@@ -30,10 +30,6 @@ Worker.TYPE = {
     DID_REMOVE: DID_REMOVE_TYPE,
     WILL_ADD: WILL_ADD_TYPE,
     DID_ADD: DID_ADD_TYPE
-};
-
-Array.prototype.contains = function (e) {
-    return this.indexOf(e) !== -1;
 };
 
 module.exports = Worker;

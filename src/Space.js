@@ -1,6 +1,8 @@
 'use strict';
 
+const _ = require('lodash');
 const EventEmitter = require('events').EventEmitter;
+
 const Agent = require('./Agent');
 const Worker = require('./Worker');
 
@@ -25,7 +27,7 @@ const Space = (_tuples, _workers) => {
         return workers.filter(
             w => w.type === type
         ).map(o => o.work);
-    }
+    };
 
     const validators = getWorkers(Worker.TYPE.VALIDATION);
     const didRemovers = getWorkers(Worker.TYPE.DID_REMOVE);
@@ -36,8 +38,8 @@ const Space = (_tuples, _workers) => {
     // Looks for the first tuple that matches the specified pattern in the
     // space.
     const find = pattern => {
-        return tuples.find(
-            pattern.match.bind(pattern)
+        return _.find(
+            tuples, pattern.match.bind(pattern)
         );
     };
 
@@ -47,8 +49,8 @@ const Space = (_tuples, _workers) => {
             return tuples.slice();
         },
         add (tuple) {
-            const isValidTuple = validators.every(
-                validator => validator(tuple)
+            const isValidTuple = _.every(
+                validators, validator => validator(tuple)
             );
             if (!isValidTuple) {
                 throw TypeError('The tuple was rejected by some validator ' +
@@ -115,28 +117,10 @@ const Space = (_tuples, _workers) => {
     };
 };
 
-Array.prototype.find = function (predicate) {
-    for (let i = 0; i < this.length; i++) {
-        if (predicate(this[i])) {
-            return this[i];
-        }
-    }
-    return undefined;
-};
-
-Array.prototype.every = function (predicate) {
-    for (let i = 0; i < this.length; i++) {
-        if (!predicate(this[i])) {
-            return false;
-        }
-    }
-    return true;
-};
-
 Array.isArrayOfArrays = function (o) {
     return (
         Array.isArray(o) &&
-        o.every(Array.isArray)
+        _.every(o, Array.isArray)
     );
 };
 
