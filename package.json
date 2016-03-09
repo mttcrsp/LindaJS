@@ -18,7 +18,8 @@
   "homepage": "https://github.com/mttcrsp/LindaJS#readme",
   "dependencies": {
     "async": "^1.5.2",
-    "expect": "^1.14.0"
+    "expect": "^1.14.0",
+    "lodash": "^4.6.1"
   },
   "devDependencies": {
     "eslint": "^2.2.0"
