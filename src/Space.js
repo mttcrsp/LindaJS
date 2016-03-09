@@ -20,22 +20,21 @@ const Space = (_tuples, _workers) => {
 
     // Extract all the provided workers to their respective category
     const workers = _workers || [];
-    const validators = workers.filter(
-        w => w.type === Worker.TYPE.VALIDATION
-    ).map(o => o.work);
-    const didRemovers = workers.filter(
-        w => w.type === Worker.TYPE.DID_REMOVE
-    ).map(o => o.work);
-    const didAdders = workers.filter(
-        w => w.type === Worker.TYPE.DID_ADD
-    ).map(o => o.work);
-    const willAdders = workers.filter(
-        w => w.type === Worker.TYPE.WILL_ADD
-    ).map(o => o.work);
-    const willRemovers = workers.filter(
-        w => w.type === Worker.TYPE.WILL_REMOVE
-    ).map(o => o.work);
 
+    const getWorkers = (type) => {
+        return workers.filter(
+            w => w.type === type
+        ).map(o => o.work);
+    }
+
+    const validators = getWorkers(Worker.TYPE.VALIDATION);
+    const didRemovers = getWorkers(Worker.TYPE.DID_REMOVE);
+    const didAdders = getWorkers(Worker.TYPE.DID_ADD);
+    const willAdders = getWorkers(Worker.TYPE.WILL_ADD);
+    const willRemovers = getWorkers(Worker.TYPE.WILL_REMOVE);
+
+    // Looks for the first tuple that matches the specified pattern in the
+    // space.
     const find = pattern => {
         return tuples.find(
             pattern.match.bind(pattern)

@@ -51,7 +51,7 @@ const Agent = _space => {
     // computation, or an error if for some reason they were not able to
     // complete their computation.
     const _eval = (activeTuple, callback) => {
-        setImmediate(() => {
+        async.nextTick(() => {
             async.map(
                 activeTuple,
                 /*eslint-disable no-shadow*/
@@ -89,7 +89,7 @@ const Agent = _space => {
         return (patternArray, callback) => {
             const pattern = Pattern(...patternArray);
             blocked = true;
-            setImmediate(() => {
+            async.nextTick(() => {
                 searchSpace(pattern, tuple => {
                     blocked = false;
                     if (shouldRemove && tuple !== undefined) {
