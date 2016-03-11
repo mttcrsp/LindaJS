@@ -1,39 +1,24 @@
 'use strict';
 
-const _ = require('lodash');
 const EventEmitter = require('events').EventEmitter;
 
+const _ = require('lodash');
+const async = require('async');
+
 const Agent = require('./Agent');
-const Worker = require('./Worker');
+
+const VALIDATION_ERROR = new Error('The tuple was rejected by some validator function');
+const NOT_FOUND_ERROR = new Error('You are trying to delete a tuple that does not belong to the space');
 
 const NEW_TUPLE_EVENT = 'newTuple';
 
-const Space = (_tuples, _workers) => {
-    if (
-        _tuples !== undefined &&
-        !Array.isArrayOfArrays(_tuples)
-    ) {
-        throw new Error('Expected initial tuples to be an array of tuples ' +
-        '(aka array of arrays).');
+const Space = (_tuples, options) => {
+    if (_tuples && !Array.isArrayOfArrays(_tuples)) {
+        throw new Error('Expected initial tuples to be an array of tuples (aka array of arrays).');
     }
 
     const tuples = _tuples || [];
     const emitter = new EventEmitter();
-
-    // Extract all the provided workers to their respective category
-    const workers = _workers || [];
-
-    const getWorkers = (type) => {
-        return workers.filter(
-            w => w.type === type
-        ).map(o => o.work);
-    };
-
-    const validators = getWorkers(Worker.TYPE.VALIDATION);
-    const didRemovers = getWorkers(Worker.TYPE.DID_REMOVE);
-    const didAdders = getWorkers(Worker.TYPE.DID_ADD);
-    const willAdders = getWorkers(Worker.TYPE.WILL_ADD);
-    const willRemovers = getWorkers(Worker.TYPE.WILL_REMOVE);
 
     // Looks for the first tuple that matches the specified pattern in the
     // space.
@@ -48,35 +33,75 @@ const Space = (_tuples, _workers) => {
             // Fastest way to clone an array
             return tuples.slice();
         },
-        add (tuple) {
+        add (tuple, cb) {
             const isValidTuple = _.every(
-                validators, validator => validator(tuple)
+                options.validators, validator => validator(tuple)
             );
             if (!isValidTuple) {
-                throw TypeError('The tuple was rejected by some validator ' +
-                'function');
+                return cb(VALIDATION_ERROR);
             }
 
-            // FIXME: This should be done asyncronously
-            willAdders.forEach(worker => worker(tuple));
-            tuples.push(tuple);
-            didAdders.forEach(worker => worker(tuple));
+            const willAdd = (
+                options.onWillAdd || []
+            ).map(
+                worker => async.apply(worker, tuple)
+            );
 
-            emitter.emit(NEW_TUPLE_EVENT, tuple);
+            const didAdd = (
+                options.onDidAdd || []
+            ).map(
+                worker => async.apply(worker, tuple)
+            );
+
+            async.series([
+                ...willAdd,
+                (innercb) => {
+                    tuples.push(tuple);
+                    innercb();
+                },
+                ...didAdd
+            ], err => {
+                if (err) {
+                    return cb(err);
+                }
+
+                emitter.emit(NEW_TUPLE_EVENT, tuple);
+
+                cb(undefined, tuple);
+            });
         },
-        remove (tuple) {
+        remove (tuple, cb) {
             const index = tuples.indexOf(tuple);
             if (index === -1) {
-                throw new Error('You are trying to delete a tuple that does' +
-                ' not belong to the space');
+                return cb(NOT_FOUND_ERROR);
             }
 
-            // FIXME: This should be done asyncronously
-            willRemovers.forEach(worker => worker(tuple));
-            tuples.splice(index, 1);
-            didRemovers.forEach(worker => worker(tuple));
+            const willRemove = (
+                options.onWillRemove || []
+            ).map(
+                worker => async.apply(worker, tuple)
+            );
+
+            const didRemove = (
+                options.onDidRemove || []
+            ).map(
+                worker => async.apply(worker, tuple)
+            );
+
+            async.series([
+                ...willRemove,
+                (innercb) => {
+                    tuples.splice(index, 1);
+                    innercb();
+                },
+                ...didRemove
+            ], err => {
+                if (err) {
+                    return cb(err);
+                }
+                cb(undefined, tuple);
+            });
         },
-        find,
         // This two functions implement the two necessary search types, non
         // blocking and blocking:
         // - Verify verifies if a tuple matching the provided predicate can be
@@ -85,9 +110,8 @@ const Space = (_tuples, _workers) => {
         // - Match looks for a matching tuple indefinetly and invokes the
         //   callback when one it is found. Look below to see the details of
         //   how this indefinitely running search is implemented.
-        verify (pattern, callback) {
-            const tuple = find(pattern);
-            callback(tuple);
+        verify (pattern) {
+            return find(pattern);
         },
         match (pattern, callback) {
             // If a tuple that matches the specified pattern can not be found
@@ -97,9 +121,8 @@ const Space = (_tuples, _workers) => {
             if (tuple !== undefined) {
                 return callback(tuple);
             }
-            /*eslint-disable no-shadow*/
-            const tryMatchingWithNewTuple = tuple => {
-            /*eslint-enable no-shadow*/
+
+            const tryMatchingWithNewTuple = tuple => { // eslint-disable-line no-shadow
                 if (!pattern.match(tuple)) {
                     return;
                 }
@@ -111,8 +134,20 @@ const Space = (_tuples, _workers) => {
             };
             emitter.on(NEW_TUPLE_EVENT, tryMatchingWithNewTuple);
         },
-        createAgent () {
-            return Agent(this);
+        createAgent (role) {
+            const roles = options.roles;
+            // If no role was specified simply return an agent that is enable
+            // to perform every possibile operation. Otherwise check that the
+            // role, is a valid one.
+            if (roles === undefined) {
+                return Agent(this);
+            }
+
+            if (roles.indexOf(role) === -1) {
+                throw new Error('This role is not defined. Declare it on the space');
+            }
+
+            return Agent(this, role);
         }
     };
 };

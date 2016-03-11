@@ -3,10 +3,12 @@
 'use strict';
 
 const expect = require('expect');
+const async = require('async');
+const series = async.series;
+const apply = async.apply;
 
 const Space = require('../src/Space');
 const Pattern = require('../src/Pattern');
-const Worker = require('../src/Worker');
 
 describe('Space', function() {
     let space;
@@ -18,141 +20,153 @@ describe('Space', function() {
     const pattern = Pattern(1, 2, 3);
 
     beforeEach(function () {
-        const validator = Worker(
-            Worker.TYPE.VALIDATION,
-            t => t[0] !== 'invalid'
-        );
-        const workers = [validator];
-        space = Space(undefined, workers);
+        const options = {
+            validators: [
+                t => t[0] !== 'invalid'
+            ]
+        }
+        space = Space(undefined, options);
     });
 
     describe('#constructor(tuples)', function () {
-        it('should error if the provided value is not a array of tuples', function () {
-            expect(() => {
-                space = Space(1);
-            }).toThrow();
-
-            expect(() => {
-                space = Space([1, 2, 3]);
-            }).toThrow();
-        });
-
         it('should correctly initialize the tuples space if an initial value is provided', function () {
             space = Space([tuple, otherTuple]);
-            expect(space.getTuples().length).toEqual(2);
+            expect(space.getTuples().length).toBe(2);
+        });
+
+        it('should error if the provided value is not a array of tuples', function () {
+            expect(() => {
+                Space(1);
+            }).toThrow();
+
+            expect(() => {
+                Space([1, 2, 3]);
+            }).toThrow();
         });
     });
 
-    describe('#add(tuple)', function () {
-        it('should add tuples', function () {
-            space.add(tuple);
-            space.add(otherTuple);
+    describe('#add(tuple, cb)', function () {
+        it('should add tuples', function (done) {
+            series([
+                apply(space.add, tuple),
+                apply(space.add, otherTuple)
+            ], (err) => {
+                expect(err).toNotExist();
 
-            expect(space.getTuples().length).toEqual(2);
+                const tuples = space.getTuples();
+                expect(tuples[0]).toBe(tuple);
+                expect(tuples[1]).toBe(otherTuple);
+                expect(tuples.length).toBe(2);
+
+                done()
+            });
         });
 
         it('should add duplicated tuples', function () {
-            space.add(tuple);
-            space.add(tuple);
+            series([
+                apply(space.add, tuple),
+                apply(space.add, tuple)
+            ], (err) => {
+                expect(err).toNotExist();
 
-            expect(space.getTuples().length).toEqual(2);
+                const tuples = space.getTuples();
+                expect(tuples[0]).toBe(tuple);
+                expect(tuples[1]).toBe(tuple);
+                expect(tuples.length).toBe(2);
+
+                done()
+            });
         });
 
-        it('should throw an error if the tuple is invalid and not add it to the space', function () {
-            expect(() => {
-                space.add(invalidTuple);
-            }).toThrow();
-            expect(space.getTuples().length).toEqual(0);
+        it('should throw an error if the tuple is invalid and not add it to the space', function (done) {
+            space.add(invalidTuple, err => {
+                expect(err).toExist();
+                expect(space.getTuples().length).toBe(0);
+
+                done()
+            });
         });
     });
 
     describe('#remove(tuple)', function () {
-        it('should remove tuples', function () {
-            space.add(tuple);
-            space.add(otherTuple);
-            space.remove(tuple);
+        it('should remove tuples', function (done) {
+            series([
+                apply(space.add, tuple),
+                apply(space.add, otherTuple),
+                apply(space.remove, tuple)
+            ], err => {
+                expect(err).toNotExist();
 
-            expect(space.getTuples()[0]).toEqual(otherTuple);
+                const tuples = space.getTuples();
+                expect(tuples[0]).toEqual(otherTuple);
+
+                done();
+            });
         });
 
-        it('should remove duplicated tuples only once', function () {
-            space.add(tuple);
-            space.add(tuple);
-            space.remove(tuple);
+        it('should remove duplicated tuples only once', function (done) {
+            series([
+                apply(space.add, tuple),
+                apply(space.add, tuple),
+                apply(space.remove, tuple)
+            ], err => {
+                expect(err).toNotExist();
 
-            expect(space.getTuples().length).toEqual(1);
-        });
-    });
+                const tuples = space.getTuples();
+                expect(tuples.length).toEqual(1);
 
-    describe('#find', function () {
-        it('should return a tuple matching the pattern if a matching tuple is available', function () {
-            space.add(tuple);
-
-            expect(
-                space.find(pattern)
-            ).toBe(tuple);
-        });
-
-        it('should return undefined if no tuple matching the predicate is available', function () {
-            space.add(otherTuple);
-
-            expect(
-                space.find(pattern)
-            ).toNotExist();
+                done();
+            });
         });
     });
+
 
     describe('#verify(pattern, callback)', function () {
         it('should match with tuples that are already available', function (done) {
-            space.add(tuple);
-
-            space.verify(pattern, (result) => {
-                expect(result).toBe(tuple);
+            space.add(tuple, () => {
+                expect(
+                    space.verify(pattern)
+                ).toBe(tuple);
                 done();
             });
         });
 
-        it('should not match with tuples that are not yet available', function (done) {
-            setTimeout(() => {
-                space.add(tuple);
-            }, 100);
-
-            space.verify(pattern, (result) => {
-                expect(result).toNotExist();
-                done();
-            });
+        it('should not match with tuples that are not yet available', function () {
+            expect(
+                space.verify(pattern)
+            ).toNotExist();
         });
     });
 
     describe('#match(pattern, callback)', function () {
         it('should match with tuples that are already available', function (done) {
-            space.add(tuple);
-
-            space.match(pattern, (result) => {
-                expect(result).toBe(tuple);
-                done();
+            space.add(tuple, () => {
+                space.match(pattern, match => {
+                    expect(match).toBe(tuple);
+                    done();
+                });
             });
         });
 
         it('should match with tuples that are not yet available', function (done) {
             setTimeout(() => {
-                space.add(tuple);
+                space.add(tuple, () => {});
             }, 100);
 
-            space.match(pattern, (result) => {
+            space.match(pattern, result => {
                 expect(result).toBe(tuple);
                 done();
             });
         });
     });
 
-    describe('#createAgent()', function () {
-        it('should create an agent able to work on this space', function (done) {
-            const agent = space.createAgent();
-            agent.out(tuple, () => {
-                expect(space.getTuples().length).toEqual(1);
-                done();
-            });
-        });
-    });
+    // describe('#createAgent([roles])', function () {
+    //     it('should create an agent able to work on this space', function (done) {
+    //         const agent = space.createAgent();
+    //         agent.out(tuple, () => {
+    //             expect(space.getTuples().length).toEqual(1);
+    //             done();
+    //         });
+    //     });
+    // });
 });
