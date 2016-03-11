@@ -1,4 +1,4 @@
-/*eslint-disable no-undef,max-nested-callbacks,max-len*/
+/*eslint-disable no-undef,max-nested-callbacks*/
 
 'use strict';
 
