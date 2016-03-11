@@ -9,6 +9,9 @@ const apply = async.apply;
 
 const Space = require('../src/Space');
 const Pattern = require('../src/Pattern');
+const Operation = require('../src/Operation');
+const Permission = require('../src/Permission');
+const Role = require('../src/Role');
 
 describe('Space', function() {
     let space;
@@ -19,13 +22,19 @@ describe('Space', function() {
 
     const pattern = Pattern(1, 2, 3);
 
+    const read = Permission(Operation.TYPE.IN, Pattern(1));
+    const write = Permission(Operation.TYPE.OUT, Pattern(1));
+
+    const User = Role([read]);
+    const Admin = Role([write], [User]);
+
     beforeEach(function () {
         const options = {
             validators: [
                 t => t[0] !== 'invalid'
             ]
-        }
-        space = Space(undefined, options);
+        };
+        space = Space([], options);
     });
 
     describe('#constructor(tuples)', function () {
@@ -58,7 +67,7 @@ describe('Space', function() {
                 expect(tuples[1]).toBe(otherTuple);
                 expect(tuples.length).toBe(2);
 
-                done()
+                done();
             });
         });
 
@@ -74,7 +83,7 @@ describe('Space', function() {
                 expect(tuples[1]).toBe(tuple);
                 expect(tuples.length).toBe(2);
 
-                done()
+                done();
             });
         });
 
@@ -82,8 +91,7 @@ describe('Space', function() {
             space.add(invalidTuple, err => {
                 expect(err).toExist();
                 expect(space.getTuples().length).toBe(0);
-
-                done()
+                done();
             });
         });
     });
@@ -160,13 +168,62 @@ describe('Space', function() {
         });
     });
 
-    // describe('#createAgent([roles])', function () {
-    //     it('should create an agent able to work on this space', function (done) {
-    //         const agent = space.createAgent();
-    //         agent.out(tuple, () => {
-    //             expect(space.getTuples().length).toEqual(1);
-    //             done();
-    //         });
-    //     });
-    // });
+    describe('#createAgent([roles])', function () {
+        it('should create an agent able to work on this space', function (done) {
+            const agent = space.createAgent();
+            agent.out(tuple, (err, added) => {
+                expect(err).toNotExist();
+                expect(added).toBe(tuple);
+
+                const tuples = space.getTuples();
+                expect(tuples.length).toEqual(1);
+
+                done();
+            });
+        });
+
+        it('should throw if on of the specified roles is not defined for the space', function () {
+            space = Space([], {
+                roles: [User]
+            });
+
+            expect(() => {
+                space.createAgent(Admin);
+            }).toThrow();
+        });
+
+        it('should prevent unauthorized operations', function (done) {
+            space = Space([], {
+                roles: [User, Admin]
+            });
+
+            const agent = space.createAgent(User);
+
+            agent.out([1], (err, added) => {
+                expect(err).toExist();
+                expect(added).toNotExist();
+
+                const tuples = space.getTuples();
+                expect(tuples.length).toBe(0);
+                done();
+            });
+        });
+
+        it('should allow authorized operations', function (done) {
+            space = Space([[1]], {
+                roles: [User, Admin]
+            });
+
+            const agent = space.createAgent(Admin);
+
+            agent.in(Pattern(1), (err, removed) => {
+                expect(err).toNotExist();
+                expect(removed).toExist();
+
+                const tuples = space.getTuples();
+                expect(tuples.length).toBe(0);
+                done();
+            });
+        });
+    });
 });
