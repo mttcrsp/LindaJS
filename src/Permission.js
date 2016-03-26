@@ -21,7 +21,7 @@ const Permission = (type, operand) => {
                 case Operation.TYPE.RD:
                 case Operation.TYPE.INP:
                 case Operation.TYPE.RDP:
-                    return operand.isSubpattern(operation.operand);
+                    return operation.operand.isSubpattern(operand);
                 default:
                     return false;
             }

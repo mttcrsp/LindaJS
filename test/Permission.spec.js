@@ -4,9 +4,10 @@
 
 const expect = require('expect');
 
-const Pattern = require('../src/Pattern');
 const Permission = require('../src/Permission');
 const Operation = require('../src/Operation');
+const Pattern = require('../src/Pattern');
+const _ = Pattern.WILDCARD;
 
 describe('Permission', function () {
     describe('constructor', function () {
@@ -57,6 +58,34 @@ describe('Permission', function () {
             );
             expect(
                 writePermission.authorizes(write)
+            ).toBe(false);
+        });
+
+        it('should return true for more specific operations', function () {
+            const write = Operation(
+                Operation.TYPE.IN,
+                Pattern(1)
+            );
+            const permission = Permission(
+                Operation.TYPE.IN,
+                Pattern(_)
+            );
+            expect(
+                permission.authorizes(write)
+            ).toBe(true);
+        });
+
+        it('should return false for more generic operations', function () {
+            const write = Operation(
+                Operation.TYPE.IN,
+                Pattern(_)
+            );
+            const permission = Permission(
+                Operation.TYPE.IN,
+                Pattern(1)
+            );
+            expect(
+                permission.authorizes(write)
             ).toBe(false);
         });
     });
