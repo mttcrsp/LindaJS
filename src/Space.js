@@ -20,6 +20,8 @@ const Space = (_tuples, options) => {
     const tuples = _tuples || [];
     const emitter = new EventEmitter();
 
+    const roles = [];
+
     // Looks for the first tuple that matches the specified pattern in the
     // space.
     const find = pattern => {
@@ -134,12 +136,14 @@ const Space = (_tuples, options) => {
             };
             emitter.on(NEW_TUPLE_EVENT, tryMatchingWithNewTuple);
         },
+        addRoles (newRoles) {
+            roles.push(...newRoles);
+        },
         createAgent (role) {
-            const roles = options.roles;
             // If no role was specified simply return an agent that is enable
             // to perform every possibile operation. Otherwise check that the
             // role, is a valid one.
-            if (roles === undefined) {
+            if (roles.length === 0) {
                 return Agent(this);
             }
 
