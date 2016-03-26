@@ -16,42 +16,32 @@ describe('Worker', function () {
 
     describe('workers of different types', function () {
         it('should be ran in the correct order', function (done) {
-            const options = {
-                onWillAdd: [
-                    (t, cb) => {
-                        expect(t).toExist();
-                        const tuples = space.getTuples();
-                        expect(tuples.length).toEqual(0);
-                        cb();
-                    }
-                ],
-                onDidAdd: [
-                    (t, cb) => {
-                        expect(t).toExist();
-                        const tuples = space.getTuples();
-                        expect(tuples.length).toEqual(1);
-                        cb();
-                    }
-                ],
-                onWillRemove: [
-                    (t, cb) => {
-                        expect(t).toExist();
-                        const tuples = space.getTuples();
-                        expect(tuples.length).toEqual(1);
-                        cb();
-                    }
-                ],
-                onDidRemove: [
-                    (t, cb) => {
-                        expect(t).toExist();
-                        const tuples = space.getTuples();
-                        expect(tuples.length).toEqual(0);
-                        cb();
-                    }
-                ]
-            };
+            space = Space();
 
-            space = Space([], options);
+            space.onWillAdd((t, cb) => {
+                expect(t).toExist();
+                const tuples = space.getTuples();
+                expect(tuples.length).toEqual(0);
+                cb();
+            });
+            space.onDidAdd((t, cb) => {
+                expect(t).toExist();
+                const tuples = space.getTuples();
+                expect(tuples.length).toEqual(1);
+                cb();
+            });
+            space.onWillRemove((t, cb) => {
+                expect(t).toExist();
+                const tuples = space.getTuples();
+                expect(tuples.length).toEqual(1);
+                cb();
+            });
+            space.onDidRemove((t, cb) => {
+                expect(t).toExist();
+                const tuples = space.getTuples();
+                expect(tuples.length).toEqual(0);
+                cb();
+            });
 
             series([
                 apply(space.add, tuple),
@@ -80,9 +70,10 @@ describe('Worker', function () {
                 cb();
             };
 
-            space = Space([], {
-                onWillAdd: [work, work]
-            });
+            space = Space();
+
+            space.onWillAdd(work);
+            space.onWillAdd(work);
 
             space.add(tuple, () => {});
         });
@@ -105,9 +96,10 @@ describe('Worker', function () {
                 cb();
             };
 
-            space = Space([], {
-                onDidAdd: [work, work]
-            });
+            space = Space();
+
+            space.onDidAdd(work);
+            space.onDidAdd(work);
 
             space.add(tuple, () => {});
         });
@@ -130,9 +122,10 @@ describe('Worker', function () {
                 cb();
             };
 
-            space = Space([tuple], {
-                onWillRemove: [work, work]
-            });
+            space = Space([tuple]);
+
+            space.onWillRemove(work);
+            space.onWillRemove(work);
 
             space.remove(tuple, () => {});
         });
@@ -155,9 +148,10 @@ describe('Worker', function () {
                 cb();
             };
 
-            space = Space([tuple], {
-                onDidRemove: [work, work]
-            });
+            space = Space([tuple]);
+
+            space.onDidRemove(work);
+            space.onDidRemove(work);
 
             space.remove(tuple, () => {});
         });
