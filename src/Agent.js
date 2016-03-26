@@ -2,8 +2,8 @@
 
 const Operation = require('./Operation');
 
-const BLOCKED_ERROR = new Error('This agent is still waiting for a response to one a previosly requested operation. Retry after the previous operation will be completed.');
-const UNAUTHORIZED_ERROR = new Error('This agent is not authorized to perform this operation');
+const BLOCKED_ERROR = new Error('This agent is still waiting for a response to a previosly requested operation. Retry after the previous operation will be completed.');
+const UNAUTHORIZED_ERROR = new Error('This agent is not authorized to perform this operation.');
 
 // The Linda specifications prescribe in and rd operations to block the caller
 // and inp and rdp operations to be non blocking. This clearly does not match
