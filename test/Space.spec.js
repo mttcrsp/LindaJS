@@ -182,10 +182,10 @@ describe('Space', function() {
             });
         });
 
-        it('should throw if on of the specified roles is not defined for the space', function () {
-            space = Space([], {
-                roles: [User]
-            });
+        it('should throw if one of the specified roles is not defined for the space', function () {
+            space = Space([], {});
+
+            space.addRoles([User]);
 
             expect(() => {
                 space.createAgent(Admin);
@@ -193,9 +193,9 @@ describe('Space', function() {
         });
 
         it('should prevent unauthorized operations', function (done) {
-            space = Space([], {
-                roles: [User, Admin]
-            });
+            space = Space([], {});
+
+            space.addRoles([User, Admin]);
 
             const agent = space.createAgent(User);
 
@@ -210,9 +210,9 @@ describe('Space', function() {
         });
 
         it('should allow authorized operations', function (done) {
-            space = Space([[1]], {
-                roles: [User, Admin]
-            });
+            space = Space([[1]], {});
+
+            space.addRoles([User, Admin]);
 
             const agent = space.createAgent(Admin);
 
