@@ -12,15 +12,24 @@ const NOT_FOUND_ERROR = new Error('You are trying to delete a tuple that does no
 
 const NEW_TUPLE_EVENT = 'newTuple';
 
-const Space = (_tuples, options) => {
-    if (_tuples && !Array.isArrayOfArrays(_tuples)) {
+const Space = (initialTuples) => {
+    if (initialTuples && !Array.isArrayOfArrays(initialTuples)) {
         throw new Error('Expected initial tuples to be an array of tuples (aka array of arrays).');
     }
 
-    const tuples = _tuples || [];
+    const tuples = initialTuples || [];
     const emitter = new EventEmitter();
 
     const roles = [];
+
+    const validators = [];
+
+    const eventHandlers = {
+        onWillAdd: [],
+        onDidAdd: [],
+        onWillRemove: [],
+        onDidRemove: []
+    };
 
     // Looks for the first tuple that matches the specified pattern in the
     // space.
@@ -37,20 +46,20 @@ const Space = (_tuples, options) => {
         },
         add (tuple, cb) {
             const isValidTuple = _.every(
-                options.validators, validator => validator(tuple)
+                validators, validator => validator(tuple)
             );
             if (!isValidTuple) {
                 return cb(VALIDATION_ERROR);
             }
 
             const willAdd = (
-                options.onWillAdd || []
+                eventHandlers.onWillAdd
             ).map(
                 worker => async.apply(worker, tuple)
             );
 
             const didAdd = (
-                options.onDidAdd || []
+                eventHandlers.onDidAdd
             ).map(
                 worker => async.apply(worker, tuple)
             );
@@ -79,13 +88,13 @@ const Space = (_tuples, options) => {
             }
 
             const willRemove = (
-                options.onWillRemove || []
+                eventHandlers.onWillRemove
             ).map(
                 worker => async.apply(worker, tuple)
             );
 
             const didRemove = (
-                options.onDidRemove || []
+                eventHandlers.onDidRemove
             ).map(
                 worker => async.apply(worker, tuple)
             );
@@ -135,6 +144,21 @@ const Space = (_tuples, options) => {
                 callback(tuple);
             };
             emitter.on(NEW_TUPLE_EVENT, tryMatchingWithNewTuple);
+        },
+        addValidator (validator) {
+            validators.push(validator);
+        },
+        onWillAdd (handler) {
+            eventHandlers.onWillAdd.push(handler);
+        },
+        onDidAdd (handler) {
+            eventHandlers.onDidAdd.push(handler);
+        },
+        onWillRemove (handler) {
+            eventHandlers.onWillRemove.push(handler);
+        },
+        onDidRemove (handler) {
+            eventHandlers.onDidRemove.push(handler);
         },
         addRoles (newRoles) {
             roles.push(...newRoles);

@@ -19,12 +19,8 @@ describe('Agent', function () {
     }];
 
     beforeEach(function () {
-        const options = {
-            validators: [
-                t => t[0] !== 'invalid'
-            ]
-        };
-        space = Space([], options);
+        space = Space();
+        space.addValidator(t => t[0] !== 'invalid');
         agent = space.createAgent();
     });
 
