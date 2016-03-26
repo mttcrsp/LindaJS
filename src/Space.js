@@ -7,8 +7,8 @@ const async = require('async');
 
 const Agent = require('./Agent');
 
-const VALIDATION_ERROR = new Error('The tuple was rejected by some validator function');
-const NOT_FOUND_ERROR = new Error('You are trying to delete a tuple that does not belong to the space');
+const VALIDATION_ERROR = new Error('The tuple was rejected by some validator function.');
+const NOT_FOUND_ERROR = new Error('You are trying to delete a tuple that does not belong to the space.');
 
 const NEW_TUPLE_EVENT = 'newTuple';
 
@@ -105,8 +105,8 @@ const Space = (_tuples, options) => {
         // This two functions implement the two necessary search types, non
         // blocking and blocking:
         // - Verify verifies if a tuple matching the provided predicate can be
-        //   found in the space and immediately invokes the callback with a
-        //   matching tuple or undefined if no matching tuple can be found.
+        //   found in the space and immediately returns with a matching tuple or
+        //   undefined if no matching tuple can be found.
         // - Match looks for a matching tuple indefinetly and invokes the
         //   callback when one it is found. Look below to see the details of
         //   how this indefinitely running search is implemented.
