@@ -13,8 +13,8 @@ const NOT_FOUND_ERROR = new Error('You are trying to delete a tuple that does no
 const NEW_TUPLE_EVENT = 'newTuple';
 
 const Space = (initialTuples) => {
-    if (initialTuples && !Array.isArrayOfArrays(initialTuples)) {
-        throw new Error('Expected initial tuples to be an array of tuples (aka array of arrays).');
+    if (initialTuples && !Array.isArrayOfObjects(initialTuples)) {
+        throw new Error('Expected initial tuples to be an array of tuples (aka array of objects).');
     }
 
     const tuples = initialTuples || [];
@@ -180,10 +180,10 @@ const Space = (initialTuples) => {
     };
 };
 
-Array.isArrayOfArrays = function (o) {
+Array.isArrayOfObjects = function (array) {
     return (
-        Array.isArray(o) &&
-        _.every(o, Array.isArray)
+        Array.isArray(array) &&
+        _.every(array, e => typeof(e) === 'object')
     );
 };
 
