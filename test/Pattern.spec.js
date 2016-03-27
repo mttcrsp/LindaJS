@@ -9,32 +9,59 @@ const Pattern = require('../src/Pattern');
 describe('Pattern', function () {
     describe('#match(tuple)', function () {
         it('should match tuples that do match', function () {
-            const pattern = Pattern(1, 'something', 3);
+            const pattern = Pattern({
+                id: 1,
+                name: 'Bob'
+            });
+            const tuple = {
+                id: 1,
+                name: 'Bob'
+            };
             expect(
-                pattern.match([1, 'something', 3])
+                pattern.match(tuple)
             ).toExist();
         });
 
         it('should not match tuples that do not match', function () {
-            const pattern = Pattern(1, 2, 3);
+            const pattern = Pattern({
+                id: 1,
+                name: 'Matteo'
+            });
+            const tuple = {
+                id: 1,
+                name: 'Something'
+            };
             expect(
-                pattern.match([1, 2, 4])
-            ).toNotExist();
-            expect(
-                pattern.match([4, 2, 1])
+                pattern.match(tuple)
             ).toNotExist();
         });
 
         it('should match tuples correctly using the wildcard element', function () {
-            const pattern = Pattern(1, Pattern.WILDCARD, 2);
+            const pattern = Pattern({
+                id: 0,
+                name: Pattern.WILDCARD
+            });
+
+            const tuple = {
+                id: 0,
+                name: 'Bob'
+            };
+            const otherTuple = {
+                id: 0,
+                name: 'Alice'
+            };
+            const notMatchingTuple = {
+                id: 1,
+                name: 'Bob'
+            };
             expect(
-                pattern.match([1, 5, 2])
+                pattern.match(tuple)
             ).toExist();
             expect(
-                pattern.match([1, 'something', 2])
+                pattern.match(otherTuple)
             ).toExist();
             expect(
-                pattern.match([1, 'something', 3])
+                pattern.match(notMatchingTuple)
             ).toNotExist();
         });
     });

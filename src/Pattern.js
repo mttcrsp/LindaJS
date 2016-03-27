@@ -5,21 +5,20 @@
 // pattern  matching to keep the implementation lightweight and leave more
 // freedom to users of the library. Given the lack of a good type system in
 // Javascript a strictly typed matching would be a huge pain to use.
-// IDEA: This implementation of the match function is order dependant. It is
-// debatable whether this is a good idea or not.
-function Pattern () {
-    const pattern = Array.prototype.slice.call(arguments);
-
+function Pattern (descriptor) {
+    const keys = Object.keys(descriptor);
     return {
         match (tuple) {
-            if (tuple.length !== pattern.length) {
+            const tupleKeys = Object.keys(tuple);
+            if (keys.length !== tupleKeys.length) {
                 return undefined;
             }
 
-            for (let i = 0; i < pattern.length; i++) {
-                const componentsDontMatch = pattern[i] !== tuple[i];
-                const isNotWildcard = pattern[i] !== Pattern.WILDCARD;
-                if (componentsDontMatch && isNotWildcard) {
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
+                const elementsDontMatch = descriptor[key] !== tuple[key];
+                const isNotWildcard = descriptor[key] !== Pattern.WILDCARD;
+                if (elementsDontMatch && isNotWildcard) {
                     return undefined;
                 }
             }
@@ -28,7 +27,7 @@ function Pattern () {
         },
         isSubpattern (otherPattern) {
             return (
-                otherPattern.match(pattern) !== undefined
+                otherPattern.match(descriptor) !== undefined
             );
         }
     };
