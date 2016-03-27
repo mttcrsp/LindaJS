@@ -16,21 +16,44 @@ const Role = require('../src/Role');
 describe('Space', function() {
     let space;
 
-    const tuple = [1, 2, 3];
-    const otherTuple = [3, 4, 5];
-    const invalidTuple = ['invalid', -1];
+    const tuple = {
+        id: 1,
+        name: 'Bob'
+    };
+    const otherTuple = {
+        key: 'value',
+        number: 9
+    };
+    const invalidTuple = {
+        invalid: true
+    };
 
-    const pattern = Pattern(1, 2, 3);
+    const pattern = Pattern({
+        id: 1,
+        name: 'Bob'
+    });
 
-    const read = Permission(Operation.TYPE.IN, Pattern(1));
-    const write = Permission(Operation.TYPE.OUT, Pattern(1));
+    const read = Permission(
+        Operation.TYPE.IN,
+        Pattern({
+            id: 1,
+            name: 'Bob'
+        })
+    );
+    const write = Permission(
+        Operation.TYPE.OUT,
+        Pattern({
+            id: 1,
+            name: 'Bob'
+        })
+    );
 
     const User = Role([read]);
     const Admin = Role([write], [User]);
 
     beforeEach(function () {
         space = Space();
-        space.addValidator(t => t[0] !== 'invalid');
+        space.addValidator(t => t.invalid !== true);
     });
 
     describe('#constructor(tuples)', function () {
@@ -55,7 +78,7 @@ describe('Space', function() {
             series([
                 apply(space.add, tuple),
                 apply(space.add, otherTuple)
-            ], (err) => {
+            ], err => {
                 expect(err).toNotExist();
 
                 const tuples = space.getTuples();
@@ -71,7 +94,7 @@ describe('Space', function() {
             series([
                 apply(space.add, tuple),
                 apply(space.add, tuple)
-            ], (err) => {
+            ], err => {
                 expect(err).toNotExist();
 
                 const tuples = space.getTuples();
@@ -188,16 +211,22 @@ describe('Space', function() {
             }).toThrow();
         });
 
-        it('should prevent unauthorized operations', function (done) {
-            space = Space();
+        it('should allow authorized operations', function (done) {
+            space = Space([tuple]);
 
             space.addRoles([User, Admin]);
 
-            const agent = space.createAgent(User);
+            const agent = space.createAgent(Admin);
 
-            agent.out([1], (err, added) => {
-                expect(err).toExist();
-                expect(added).toNotExist();
+            const operation = Operation(
+                Operation.TYPE.IN,
+                pattern
+            );
+            console.log(User.can(operation));
+
+            agent.in(pattern, (err, removed) => {
+                expect(err).toNotExist();
+                expect(removed).toExist();
 
                 const tuples = space.getTuples();
                 expect(tuples.length).toBe(0);
@@ -205,16 +234,14 @@ describe('Space', function() {
             });
         });
 
-        it('should allow authorized operations', function (done) {
-            space = Space([[1]], {});
-
+        it('should prevent unauthorized operations', function (done) {
             space.addRoles([User, Admin]);
 
-            const agent = space.createAgent(Admin);
+            const agent = space.createAgent(User);
 
-            agent.in(Pattern(1), (err, removed) => {
-                expect(err).toNotExist();
-                expect(removed).toExist();
+            agent.out(tuple, (err, added) => {
+                expect(err).toExist();
+                expect(added).toNotExist();
 
                 const tuples = space.getTuples();
                 expect(tuples.length).toBe(0);

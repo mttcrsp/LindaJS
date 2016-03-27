@@ -10,11 +10,20 @@ const Operation = require('../src/Operation');
 const Role = require('../src/Role');
 
 describe('Role', function () {
+    const tuple = {
+        id: 1,
+        name: 'Bob'
+    };
+    const pattern = Pattern({
+        id: 1,
+        name: 'Bob'
+    });
+
     describe('#constructor', function () {
         it('should return a role with the specified permissions', function () {
             const permissions = [
-                Permission(Operation.TYPE.OUT, Pattern(1)),
-                Permission(Operation.TYPE.IN, Pattern(1))
+                Permission(Operation.TYPE.OUT, Pattern),
+                Permission(Operation.TYPE.IN, pattern)
             ];
 
             const role = Role(permissions);
@@ -25,15 +34,15 @@ describe('Role', function () {
 
         it('should return a role that inherits permissions from the specified superroles', function () {
             const permissions = [
-                Permission(Operation.TYPE.OUT, Pattern(1)),
-                Permission(Operation.TYPE.IN, Pattern(1))
+                Permission(Operation.TYPE.OUT, pattern),
+                Permission(Operation.TYPE.IN, pattern)
             ];
 
             const parentRole = Role(permissions);
 
             const newPermission = Permission(
                 Operation.TYPE.EVAL,
-                Pattern(1)
+                pattern
             );
             const role = Role([newPermission], [parentRole]);
             expect(
@@ -41,9 +50,9 @@ describe('Role', function () {
             ).toBe(3);
         });
 
-        it('should return a role that inherits permissions from  multiple parents', function () {
-            const write = Permission(Operation.TYPE.OUT, Pattern(1));
-            const read = Permission(Operation.TYPE.IN, Pattern(1));
+        it('should return a role that inherits permissions from multiple parents', function () {
+            const write = Permission(Operation.TYPE.OUT, pattern);
+            const read = Permission(Operation.TYPE.IN, pattern);
 
             const parent1 = Role([write]);
             const parent2 = Role([read]);
@@ -57,9 +66,10 @@ describe('Role', function () {
 
     describe('#can(operation)', function () {
         it('should return true if the role has a compatible permission', function () {
-            const operation = Operation(Operation.TYPE.OUT, [1]);
-            const read = Permission(Operation.TYPE.IN, Pattern(1));
-            const write = Permission(Operation.TYPE.OUT, Pattern(1));
+            const operation = Operation(Operation.TYPE.OUT, tuple);
+
+            const read = Permission(Operation.TYPE.IN, pattern);
+            const write = Permission(Operation.TYPE.OUT, pattern);
             const role = Role([read, write]);
 
             expect(
@@ -68,8 +78,9 @@ describe('Role', function () {
         });
 
         it('should return false if the role does have a compatible permission', function () {
-            const operation = Operation(Operation.TYPE.OUT, [1]);
-            const read = Permission(Operation.TYPE.IN, Pattern(1));
+            const operation = Operation(Operation.TYPE.OUT, tuple);
+
+            const read = Permission(Operation.TYPE.IN, pattern);
             const role = Role([read]);
 
             expect(
