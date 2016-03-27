@@ -12,7 +12,10 @@ const Space = require('../src/Space');
 describe('Worker', function () {
     let space;
 
-    const tuple = [1, 2, 3];
+    const tuple = {
+        id: 1,
+        name: 'Bob'
+    };
 
     describe('workers of different types', function () {
         it('should be ran in the correct order', function (done) {

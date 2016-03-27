@@ -10,6 +10,23 @@ const Pattern = require('../src/Pattern');
 const _ = Pattern.WILDCARD;
 
 describe('Permission', function () {
+    const tuple = {
+        id: 1,
+        name: 'Bob'
+    };
+    const pattern = Pattern({
+        id: 1,
+        name: 'Bob'
+    });
+    const otherPattern = Pattern({
+        id: 2,
+        name: 'Alice'
+    });
+    const genericPattern = Pattern({
+        id: 1,
+        name: _
+    });
+
     describe('constructor', function () {
         it('should thrown an exception if an invalid invalid parameter was provided', function () {
             expect(() => {
@@ -20,10 +37,10 @@ describe('Permission', function () {
 
     describe('#authorizes', function () {
         it('should return true for compatible operations', function () {
-            const write = Operation(Operation.TYPE.OUT, [1]);
+            const write = Operation(Operation.TYPE.OUT, tuple);
             const permission = Permission(
                 Operation.TYPE.OUT,
-                Pattern(1)
+                pattern
             );
             expect(
                 permission.authorizes(write)
@@ -31,10 +48,10 @@ describe('Permission', function () {
         });
 
         it('should return false for operations with an incompatible type', function () {
-            const write = Operation(Operation.TYPE.OUT, [1]);
+            const write = Operation(Operation.TYPE.OUT, tuple);
             const permission = Permission(
                 Operation.TYPE.IN,
-                Pattern(1)
+                pattern
             );
             expect(
                 permission.authorizes(write)
@@ -42,19 +59,19 @@ describe('Permission', function () {
         });
 
         it('should return false for operation with an incompatible operand', function () {
-            const read = Operation(Operation.TYPE.IN, Pattern(1));
+            const read = Operation(Operation.TYPE.IN, pattern);
             const readPermission = Permission(
                 Operation.TYPE.IN,
-                Pattern(2)
+                otherPattern
             );
             expect(
                 readPermission.authorizes(read)
             ).toBe(false);
 
-            const write = Operation(Operation.TYPE.OUT, [1]);
+            const write = Operation(Operation.TYPE.OUT, tuple);
             const writePermission = Permission(
                 Operation.TYPE.OUT,
-                Pattern(2)
+                otherPattern
             );
             expect(
                 writePermission.authorizes(write)
@@ -64,11 +81,11 @@ describe('Permission', function () {
         it('should return true for more specific operations', function () {
             const write = Operation(
                 Operation.TYPE.IN,
-                Pattern(1)
+                pattern
             );
             const permission = Permission(
                 Operation.TYPE.IN,
-                Pattern(_)
+                genericPattern
             );
             expect(
                 permission.authorizes(write)
@@ -78,11 +95,11 @@ describe('Permission', function () {
         it('should return false for more generic operations', function () {
             const write = Operation(
                 Operation.TYPE.IN,
-                Pattern(_)
+                genericPattern
             );
             const permission = Permission(
                 Operation.TYPE.IN,
-                Pattern(1)
+                pattern
             );
             expect(
                 permission.authorizes(write)

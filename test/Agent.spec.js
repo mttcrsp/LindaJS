@@ -10,29 +10,39 @@ const Pattern = require('../src/Pattern');
 describe('Agent', function () {
     let space, agent;
 
-    const pattern = Pattern(1, 2, 3);
-    const tuple = [1, 2, 3];
-    const invalidTuple = ['invalid'];
+    const tuple = {
+        id: 1,
+        name: 'Bob'
+    };
+    const invalidTuple = {
+        invalid: true
+    };
 
-    const activeTuple = [1, callback => {
-        callback(undefined, 'something');
-    }];
+    const pattern = Pattern({
+        id: 1,
+        name: 'Bob'
+    });
+
+    const activeTuple = {
+        value: 1,
+        func: cb => cb(undefined, 'something')
+    };
 
     beforeEach(function () {
         space = Space();
-        space.addValidator(t => t[0] !== 'invalid');
+        space.addValidator(t => t.invalid !== true);
         agent = space.createAgent();
     });
 
-    // it('should not be able to operate on the space while blocked', function (done) {
-    //     // Given that the space is empty this operation should block the agent
-    //     agent.in(pattern, () => {});
-    //
-    //     agent.out(tuple, err => {
-    //         expect(err).toExist();
-    //         done();
-    //     });
-    // });
+    it('should not be able to operate on the space while blocked', function (done) {
+        // Given that the space is empty this operation should block the agent
+        agent.in(pattern, () => {});
+
+        agent.out(tuple, err => {
+            expect(err).toExist();
+            done();
+        });
+    });
 
     describe('#out(tuple, callback)', function () {
         it('should add a tuple to the space', function (done) {
@@ -147,12 +157,12 @@ describe('Agent', function () {
             agent.eval(activeTuple, (err, passiveTuple) => {
                 expect(err).toNotExist();
 
-                expect(passiveTuple[0]).toEqual(1);
-                expect(passiveTuple[1]).toEqual('something');
+                expect(passiveTuple.value).toEqual(1);
+                expect(passiveTuple.func).toEqual('something');
 
                 const tuples = space.getTuples();
-                expect(tuples[0][0]).toEqual(1);
-                expect(tuples[0][1]).toEqual('something');
+                expect(tuples[0].value).toEqual(1);
+                expect(tuples[0].func).toEqual('something');
 
                 done();
             });
