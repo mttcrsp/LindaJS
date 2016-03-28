@@ -13,6 +13,11 @@ const NOT_FOUND_ERROR = new Error('You are trying to delete a tuple that does no
 const NEW_TUPLE_EVENT = 'newTuple';
 
 const Space = (initialTuples) => {
+    // The decision to enforce the object type is a pretty opinionated one.
+    // One could decide to use a different kind of operation. The problem with
+    // that is that the pattern matching operations would become really
+    // complicated because of the need to take into account any possibile
+    // type.
     if (initialTuples && !Array.isArrayOfObjects(initialTuples)) {
         throw new Error('Expected initial tuples to be an array of tuples (aka array of objects).');
     }
