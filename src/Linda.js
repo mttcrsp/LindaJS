@@ -4,4 +4,4 @@ module.exports = {
     Pattern: require('./Pattern'),
     Role: require('./Role'),
     Permission: require('./Permission')
-};
+}
