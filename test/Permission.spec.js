@@ -6,26 +6,25 @@ const expect = require('expect');
 
 const Permission = require('../src/Permission');
 const Operation = require('../src/Operation');
-const Pattern = require('../src/Pattern');
-const _ = Pattern.WILDCARD;
+const _ = require('../src/Pattern').WILDCARD;
 
 describe('Permission', function () {
     const tuple = {
         id: 1,
         name: 'Bob'
     };
-    const pattern = Pattern({
+    const pattern = {
         id: 1,
         name: 'Bob'
-    });
-    const otherPattern = Pattern({
+    };
+    const otherPattern = {
         id: 2,
         name: 'Alice'
-    });
-    const genericPattern = Pattern({
+    };
+    const genericPattern = {
         id: 1,
         name: _
-    });
+    };
 
     describe('constructor', function () {
         it('should thrown an exception if an invalid invalid parameter was provided', function () {

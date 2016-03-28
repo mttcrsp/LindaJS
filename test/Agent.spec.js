@@ -5,7 +5,6 @@
 const expect = require('expect');
 
 const Space = require('../src/Space');
-const Pattern = require('../src/Pattern');
 
 describe('Agent', function () {
     let space, agent;
@@ -18,10 +17,10 @@ describe('Agent', function () {
         invalid: true
     };
 
-    const pattern = Pattern({
+    const pattern = {
         id: 1,
         name: 'Bob'
-    });
+    };
 
     const activeTuple = {
         value: 1,

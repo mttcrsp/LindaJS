@@ -6,6 +6,7 @@ const _ = require('lodash');
 const async = require('async');
 
 const Agent = require('./Agent');
+const Pattern = require('./Pattern');
 
 const VALIDATION_ERROR = new Error('The tuple was rejected by some validator function.');
 const NOT_FOUND_ERROR = new Error('You are trying to delete a tuple that does not belong to the space.');
@@ -126,10 +127,12 @@ const Space = (initialTuples) => {
         // - Match looks for a matching tuple indefinetly and invokes the
         //   callback when one it is found. Look below to see the details of
         //   how this indefinitely running search is implemented.
-        verify (pattern) {
+        verify (_pattern) {
+            const pattern = Pattern(_pattern);
             return find(pattern);
         },
-        match (pattern, callback) {
+        match (_pattern, callback) {
+            const pattern = Pattern(_pattern);
             // If a tuple that matches the specified pattern can not be found
             // in the space at the moment register the callback to retry
             // matching the pattern when a new tuple is added.

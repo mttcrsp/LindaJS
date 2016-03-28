@@ -4,7 +4,6 @@
 
 const expect = require('expect');
 
-const Pattern = require('../src/Pattern');
 const Permission = require('../src/Permission');
 const Operation = require('../src/Operation');
 const Role = require('../src/Role');
@@ -14,15 +13,15 @@ describe('Role', function () {
         id: 1,
         name: 'Bob'
     };
-    const pattern = Pattern({
+    const pattern = {
         id: 1,
         name: 'Bob'
-    });
+    };
 
     describe('#constructor', function () {
         it('should return a role with the specified permissions', function () {
             const permissions = [
-                Permission(Operation.TYPE.OUT, Pattern),
+                Permission(Operation.TYPE.OUT, pattern),
                 Permission(Operation.TYPE.IN, pattern)
             ];
 

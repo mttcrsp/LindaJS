@@ -8,7 +8,6 @@ const series = async.series;
 const apply = async.apply;
 
 const Space = require('../src/Space');
-const Pattern = require('../src/Pattern');
 const Operation = require('../src/Operation');
 const Permission = require('../src/Permission');
 const Role = require('../src/Role');
@@ -28,24 +27,24 @@ describe('Space', function() {
         invalid: true
     };
 
-    const pattern = Pattern({
+    const pattern = {
         id: 1,
         name: 'Bob'
-    });
+    };
 
     const read = Permission(
         Operation.TYPE.IN,
-        Pattern({
+        {
             id: 1,
             name: 'Bob'
-        })
+        }
     );
     const write = Permission(
         Operation.TYPE.OUT,
-        Pattern({
+        {
             id: 1,
             name: 'Bob'
-        })
+        }
     );
 
     const User = Role([read]);
