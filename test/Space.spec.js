@@ -1,36 +1,36 @@
 /*eslint-disable no-undef,max-nested-callbacks*/
 
-'use strict';
+'use strict'
 
-const expect = require('expect');
-const async = require('async');
-const series = async.series;
-const apply = async.apply;
+const expect = require('expect')
+const async = require('async')
+const series = async.series
+const apply = async.apply
 
-const Space = require('../src/Space');
-const Operation = require('../src/Operation');
-const Permission = require('../src/Permission');
-const Role = require('../src/Role');
+const Space = require('../src/Space')
+const Operation = require('../src/Operation')
+const Permission = require('../src/Permission')
+const Role = require('../src/Role')
 
 describe('Space', function() {
-    let space;
+    let space
 
     const tuple = {
         id: 1,
         name: 'Bob'
-    };
+    }
     const otherTuple = {
         key: 'value',
         number: 9
-    };
+    }
     const invalidTuple = {
         invalid: true
-    };
+    }
 
     const pattern = {
         id: 1,
         name: 'Bob'
-    };
+    }
 
     const read = Permission(
         Operation.TYPE.IN,
@@ -38,39 +38,39 @@ describe('Space', function() {
             id: 1,
             name: 'Bob'
         }
-    );
+    )
     const write = Permission(
         Operation.TYPE.OUT,
         {
             id: 1,
             name: 'Bob'
         }
-    );
+    )
 
-    const User = Role([read]);
-    const Admin = Role([write], [User]);
+    const User = Role([read])
+    const Admin = Role([write], [User])
 
     beforeEach(function () {
-        space = Space();
-        space.addValidator(t => t.invalid !== true);
-    });
+        space = Space()
+        space.addValidator(t => t.invalid !== true)
+    })
 
     describe('#constructor(tuples)', function () {
         it('should correctly initialize the tuples space if an initial value is provided', function () {
-            space = Space([tuple, otherTuple]);
-            expect(space.getTuples().length).toBe(2);
-        });
+            space = Space([tuple, otherTuple])
+            expect(space.getTuples().length).toBe(2)
+        })
 
         it('should error if the provided value is not a array of tuples', function () {
             expect(() => {
-                Space(1);
-            }).toThrow();
+                Space(1)
+            }).toThrow()
 
             expect(() => {
-                Space([1, 2, 3]);
-            }).toThrow();
-        });
-    });
+                Space([1, 2, 3])
+            }).toThrow()
+        })
+    })
 
     describe('#add(tuple, cb)', function () {
         it('should add tuples', function (done) {
@@ -78,41 +78,41 @@ describe('Space', function() {
                 apply(space.add, tuple),
                 apply(space.add, otherTuple)
             ], err => {
-                expect(err).toNotExist();
+                expect(err).toNotExist()
 
-                const tuples = space.getTuples();
-                expect(tuples[0]).toBe(tuple);
-                expect(tuples[1]).toBe(otherTuple);
-                expect(tuples.length).toBe(2);
+                const tuples = space.getTuples()
+                expect(tuples[0]).toBe(tuple)
+                expect(tuples[1]).toBe(otherTuple)
+                expect(tuples.length).toBe(2)
 
-                done();
-            });
-        });
+                done()
+            })
+        })
 
         it('should add duplicated tuples', function () {
             series([
                 apply(space.add, tuple),
                 apply(space.add, tuple)
             ], err => {
-                expect(err).toNotExist();
+                expect(err).toNotExist()
 
-                const tuples = space.getTuples();
-                expect(tuples[0]).toBe(tuple);
-                expect(tuples[1]).toBe(tuple);
-                expect(tuples.length).toBe(2);
+                const tuples = space.getTuples()
+                expect(tuples[0]).toBe(tuple)
+                expect(tuples[1]).toBe(tuple)
+                expect(tuples.length).toBe(2)
 
-                done();
-            });
-        });
+                done()
+            })
+        })
 
         it('should throw an error if the tuple is invalid and not add it to the space', function (done) {
             space.add(invalidTuple, err => {
-                expect(err).toExist();
-                expect(space.getTuples().length).toBe(0);
-                done();
-            });
-        });
-    });
+                expect(err).toExist()
+                expect(space.getTuples().length).toBe(0)
+                done()
+            })
+        })
+    })
 
     describe('#remove(tuple)', function () {
         it('should remove tuples', function (done) {
@@ -121,14 +121,14 @@ describe('Space', function() {
                 apply(space.add, otherTuple),
                 apply(space.remove, tuple)
             ], err => {
-                expect(err).toNotExist();
+                expect(err).toNotExist()
 
-                const tuples = space.getTuples();
-                expect(tuples[0]).toEqual(otherTuple);
+                const tuples = space.getTuples()
+                expect(tuples[0]).toEqual(otherTuple)
 
-                done();
-            });
-        });
+                done()
+            })
+        })
 
         it('should remove duplicated tuples only once', function (done) {
             series([
@@ -136,15 +136,15 @@ describe('Space', function() {
                 apply(space.add, tuple),
                 apply(space.remove, tuple)
             ], err => {
-                expect(err).toNotExist();
+                expect(err).toNotExist()
 
-                const tuples = space.getTuples();
-                expect(tuples.length).toEqual(1);
+                const tuples = space.getTuples()
+                expect(tuples.length).toEqual(1)
 
-                done();
-            });
-        });
-    });
+                done()
+            })
+        })
+    })
 
 
     describe('#verify(pattern, callback)', function () {
@@ -152,100 +152,100 @@ describe('Space', function() {
             space.add(tuple, () => {
                 expect(
                     space.verify(pattern)
-                ).toBe(tuple);
-                done();
-            });
-        });
+                ).toBe(tuple)
+                done()
+            })
+        })
 
         it('should not match with tuples that are not yet available', function () {
             expect(
                 space.verify(pattern)
-            ).toNotExist();
-        });
-    });
+            ).toNotExist()
+        })
+    })
 
     describe('#match(pattern, callback)', function () {
         it('should match with tuples that are already available', function (done) {
             space.add(tuple, () => {
                 space.match(pattern, match => {
-                    expect(match).toBe(tuple);
-                    done();
-                });
-            });
-        });
+                    expect(match).toBe(tuple)
+                    done()
+                })
+            })
+        })
 
         it('should match with tuples that are not yet available', function (done) {
             setTimeout(() => {
-                space.add(tuple, () => {});
-            }, 100);
+                space.add(tuple, () => {})
+            }, 100)
 
             space.match(pattern, result => {
-                expect(result).toBe(tuple);
-                done();
-            });
-        });
-    });
+                expect(result).toBe(tuple)
+                done()
+            })
+        })
+    })
 
     describe('#createAgent([roles])', function () {
         it('should create an agent able to work on this space', function (done) {
-            const agent = space.createAgent();
+            const agent = space.createAgent()
             agent.out(tuple, (err, added) => {
-                expect(err).toNotExist();
-                expect(added).toBe(tuple);
+                expect(err).toNotExist()
+                expect(added).toBe(tuple)
 
-                const tuples = space.getTuples();
-                expect(tuples.length).toEqual(1);
+                const tuples = space.getTuples()
+                expect(tuples.length).toEqual(1)
 
-                done();
-            });
-        });
+                done()
+            })
+        })
 
         it('should throw if one of the specified roles is not defined for the space', function () {
-            space = Space();
+            space = Space()
 
-            space.addRoles([User]);
+            space.addRoles([User])
 
             expect(() => {
-                space.createAgent(Admin);
-            }).toThrow();
-        });
+                space.createAgent(Admin)
+            }).toThrow()
+        })
 
         it('should allow authorized operations', function (done) {
-            space = Space([tuple]);
+            space = Space([tuple])
 
-            space.addRoles([User, Admin]);
+            space.addRoles([User, Admin])
 
-            const agent = space.createAgent(Admin);
+            const agent = space.createAgent(Admin)
 
             const operation = Operation(
                 Operation.TYPE.IN,
                 pattern
-            );
-            console.log(User.can(operation));
+            )
+            console.log(User.can(operation))
 
             agent.in(pattern, (err, removed) => {
-                expect(err).toNotExist();
-                expect(removed).toExist();
+                expect(err).toNotExist()
+                expect(removed).toExist()
 
-                const tuples = space.getTuples();
-                expect(tuples.length).toBe(0);
-                done();
-            });
-        });
+                const tuples = space.getTuples()
+                expect(tuples.length).toBe(0)
+                done()
+            })
+        })
 
         it('should prevent unauthorized operations', function (done) {
-            space.addRoles([User, Admin]);
+            space.addRoles([User, Admin])
 
-            const agent = space.createAgent(User);
+            const agent = space.createAgent(User)
 
             agent.out(tuple, (err, added) => {
-                expect(err).toExist();
-                expect(added).toNotExist();
+                expect(err).toExist()
+                expect(added).toNotExist()
 
-                const tuples = space.getTuples();
-                expect(tuples.length).toBe(0);
-                done();
-            });
-        });
-    });
-});
+                const tuples = space.getTuples()
+                expect(tuples.length).toBe(0)
+                done()
+            })
+        })
+    })
+})

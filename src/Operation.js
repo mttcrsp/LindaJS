@@ -1,20 +1,20 @@
-'use strict';
+'use strict'
 
-const async = require('async');
+const async = require('async')
 
 const Operation = (type, operand) => {
-    const types = Object.keys(Operation.TYPE);
+    const types = Object.keys(Operation.TYPE)
     if (types.indexOf(type) === -1) {
-        throw new Error('Expected type to be a valid operation type.');
+        throw new Error('Expected type to be a valid operation type.')
     }
 
-    let operation;
+    let operation
     switch (type) {
         case Operation.TYPE.OUT:
             operation = (space, cb) => {
-                space.add(operand, cb);
-            };
-            break;
+                space.add(operand, cb)
+            }
+            break
         // In, inp, rd, rdp all follow the same pattern of execution. They all
         // schedule the search for a tuple matching the provided pattern and
         // call the callback function. They differ in the way that the search
@@ -27,33 +27,33 @@ const Operation = (type, operand) => {
         case Operation.TYPE.IN:
             operation = (space, cb) => {
                 space.match(operand, tuple => {
-                    space.remove(tuple, cb);
-                });
-            };
-            break;
+                    space.remove(tuple, cb)
+                })
+            }
+            break
         case Operation.TYPE.INP:
             operation = (space, cb) => {
-                const tuple = space.verify(operand);
+                const tuple = space.verify(operand)
                 if (!tuple) {
-                    return cb();
+                    return cb()
                 }
-                space.remove(tuple, cb);
-            };
-            break;
+                space.remove(tuple, cb)
+            }
+            break
         case Operation.TYPE.RD:
             operation = (space, cb) => {
                 space.match(operand, tuple => {
-                    cb(undefined, tuple);
-                });
-            };
-            break;
+                    cb(undefined, tuple)
+                })
+            }
+            break
         case Operation.TYPE.RDP:
             operation = (space, cb) => {
                 space.verify(operand, tuple => {
-                    cb(undefined, tuple);
-                });
-            };
-            break;
+                    cb(undefined, tuple)
+                })
+            }
+            break
         // The Linda guidelines describe an active tuple as a set of functions
         // that will be evaluated and become a passive tuple. Thus I decided
         // to model an active tuple as an array of functions that will be
@@ -71,27 +71,27 @@ const Operation = (type, operand) => {
                         // be evaluated so invoke it.
                         (e, innercb) => {
                             if (typeof e !== 'function') {
-                                return innercb(undefined, e);
+                                return innercb(undefined, e)
                             }
-                            e(innercb);
+                            e(innercb)
                         },
                         (err, tuple) => {
                             if (err) {
-                                return cb(err);
+                                return cb(err)
                             }
-                            space.add(tuple, cb);
+                            space.add(tuple, cb)
                         }
-                    );
-                });
-            };
-            break;
+                    )
+                })
+            }
+            break
     }
 
-    operation.type = type;
-    operation.operand = operand;
+    operation.type = type
+    operation.operand = operand
 
-    return operation;
-};
+    return operation
+}
 
 Operation.TYPE = {
     OUT: 'OUT',
@@ -100,6 +100,6 @@ Operation.TYPE = {
     RD: 'RD',
     RDP: 'RDP',
     EVAL: 'EVAL'
-};
+}
 
-module.exports = Operation;
+module.exports = Operation

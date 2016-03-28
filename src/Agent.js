@@ -1,9 +1,9 @@
-'use strict';
+'use strict'
 
-const Operation = require('./Operation');
+const Operation = require('./Operation')
 
-const BLOCKED_ERROR = new Error('This agent is still waiting for a response to a previosly requested operation. Retry after the previous operation will be completed.');
-const UNAUTHORIZED_ERROR = new Error('This agent is not authorized to perform this operation.');
+const BLOCKED_ERROR = new Error('This agent is still waiting for a response to a previosly requested operation. Retry after the previous operation will be completed.')
+const UNAUTHORIZED_ERROR = new Error('This agent is not authorized to perform this operation.')
 
 // The Linda specifications prescribe in and rd operations to block the caller
 // and inp and rdp operations to be non blocking. This clearly does not match
@@ -18,7 +18,7 @@ const UNAUTHORIZED_ERROR = new Error('This agent is not authorized to perform th
 // operations this way:
 // - p operations search the space and immediatly invoke the callback with a
 //   tuple matching the pattern or undefined if no tuple matching the pattern
-//   is found is found;
+//   is found is found
 // - non-p operations 'block' waiting for a matching tuple to be added to the
 //   space before returning.
 // In this context 'blocking' does not actually mean that the whole process is
@@ -27,50 +27,50 @@ const UNAUTHORIZED_ERROR = new Error('This agent is not authorized to perform th
 // will complete (from a practical standpoint until the provided callback
 // won't be invoked by the space).
 const Agent = (space, role) => {
-    let block = false;
+    let block = false
 
     const execute = (operation, cb) => {
         if (block) {
-            return cb(BLOCKED_ERROR);
+            return cb(BLOCKED_ERROR)
         }
 
         if (role && !role.can(operation)) {
-            return cb(UNAUTHORIZED_ERROR);
+            return cb(UNAUTHORIZED_ERROR)
         }
 
-        block = true;
+        block = true
         operation(space, (err, res) => {
-            block = false;
-            cb(err, res);
-        });
-    };
+            block = false
+            cb(err, res)
+        })
+    }
 
     return {
         out (tuple, cb) {
-            const operation = Operation(Operation.TYPE.OUT, tuple);
-            execute(operation, cb);
+            const operation = Operation(Operation.TYPE.OUT, tuple)
+            execute(operation, cb)
         },
         in (pattern, cb) {
-            const operation = Operation(Operation.TYPE.IN, pattern);
-            execute(operation, cb);
+            const operation = Operation(Operation.TYPE.IN, pattern)
+            execute(operation, cb)
         },
         inp (pattern, cb) {
-            const operation = Operation(Operation.TYPE.INP, pattern);
-            execute(operation, cb);
+            const operation = Operation(Operation.TYPE.INP, pattern)
+            execute(operation, cb)
         },
         rd (pattern, cb) {
-            const operation = Operation(Operation.TYPE.RD, pattern);
-            execute(operation, cb);
+            const operation = Operation(Operation.TYPE.RD, pattern)
+            execute(operation, cb)
         },
         rdp (pattern, cb) {
-            const operation = Operation(Operation.TYPE.RDP, pattern);
-            execute(operation, cb);
+            const operation = Operation(Operation.TYPE.RDP, pattern)
+            execute(operation, cb)
         },
         eval (activeTuple, cb) {
-            const operation = Operation(Operation.TYPE.EVAL, activeTuple);
-            execute(operation, cb);
+            const operation = Operation(Operation.TYPE.EVAL, activeTuple)
+            execute(operation, cb)
         }
-    };
-};
+    }
+}
 
-module.exports = Agent;
+module.exports = Agent
