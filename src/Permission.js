@@ -1,4 +1,5 @@
 const Operation = require('./Operation');
+const Pattern = require('./Pattern');
 
 const Permission = (type, operand) => {
     const types = Object.keys(Operation.TYPE);
@@ -12,16 +13,19 @@ const Permission = (type, operand) => {
                 return false;
             }
 
+            const pattern = Pattern(operand);
+
             switch (operation.type) {
                 case Operation.TYPE.OUT:
                 case Operation.TYPE.EVAL:
-                    const match = operand.match(operation.operand);
+                    const match = pattern.match(operation.operand);
                     return match !== undefined;
                 case Operation.TYPE.IN:
                 case Operation.TYPE.RD:
                 case Operation.TYPE.INP:
                 case Operation.TYPE.RDP:
-                    return operation.operand.isSubpattern(operand);
+                    const otherPattern = Pattern(operation.operand);
+                    return otherPattern.isSubpattern(pattern);
                 default:
                     return false;
             }
