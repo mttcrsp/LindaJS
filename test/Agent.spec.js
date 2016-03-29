@@ -30,7 +30,12 @@ describe('Agent', function () {
 
     beforeEach(function () {
         space = Space()
-        space.addValidator(t => t.invalid !== true)
+        space.addValidator((t, cb) => {
+            if (t.invalid === true) {
+                return cb(new Error('Invalid tuple'))
+            }
+            cb()
+        })
         agent = space.createAgent()
     })
 
@@ -139,7 +144,7 @@ describe('Agent', function () {
                 expect(tuples.length).toEqual(0)
 
                 done()
-            })
+           })
         })
 
         it('should not return a tuple if the tuple is not in the space and is added at a later moment', function (done) {

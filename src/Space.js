@@ -39,14 +39,7 @@ const Space = (injectedStore) => {
 
     return {
         add (tuple, cb) {
-            const isValidTuple = _.every(
-                validators, validator => validator(tuple)
-            )
-            if (!isValidTuple) {
-                return cb(VALIDATION_ERROR)
-            }
-
-            const willAdd = (
+           const willAdd = (
                 eventHandlers.onWillAdd
             ).map(
                 worker => async.apply(worker, tuple)
@@ -59,6 +52,11 @@ const Space = (injectedStore) => {
             )
 
             async.series([
+                innercb => {
+                    async.parallel(validators.map(
+                        validator => async.apply(validator, tuple)
+                    ), innercb)
+                },
                 ...willAdd,
                 async.apply(store.add, tuple),
                 ...didAdd

@@ -55,7 +55,12 @@ describe('Space', function() {
     beforeEach(function () {
         store = InspectableStore()
         space = Space(store)
-        space.addValidator(t => t.invalid !== true)
+        space.addValidator((t, cb) => {
+            if (t.invalid === true) {
+                return cb(new Error('Invalid tuple'))
+            }
+            cb()
+        })
     })
 
     describe('#constructor(store)', function () {
@@ -268,11 +273,11 @@ describe('Space', function() {
 
             const agent = space.createAgent(Admin)
 
-            series([
+           series([
                 apply(space.add, tuple),
                 apply(agent.in, schemata)
             ], (err, res) => {
-                expect(err).toNotExist()
+               expect(err).toNotExist()
                 expect(res[1]).toExist()
 
                 const tuples = store.getTuples()
