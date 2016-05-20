@@ -6,7 +6,7 @@ const _ = require('lodash')
 const async = require('async')
 
 const Agent = require('./Agent')
-const Pattern = require('./Pattern')
+const match = require('./Matcher').match
 
 const INITIALIZATION_ERROR = new Error('Expected initial tuples to be an array of tuples (aka array of objects).')
 const VALIDATION_ERROR = new Error('The tuple was rejected by some validator function.')
@@ -38,11 +38,11 @@ const Space = (initialTuples) => {
         onDidRemove: []
     }
 
-    // Looks for the first tuple that matches the specified pattern in the
-    // space.
-    const find = pattern => {
+    // Looks for the first tuple that matches the specified tuple schemata in
+    // the space.
+    const find = schemata => {
         return _.find(
-            tuples, pattern.match.bind(pattern)
+            tuples, async.apply(match, schemata)
         )
     }
 
@@ -128,22 +128,20 @@ const Space = (initialTuples) => {
         // - Match looks for a matching tuple indefinetly and invokes the
         //   callback when one it is found. Look below to see the details of
         //   how this indefinitely running search is implemented.
-        verify (_pattern) {
-            const pattern = Pattern(_pattern)
-            return find(pattern)
+        verify (schemata) {
+            return find(schemata)
         },
-        match (_pattern, callback) {
-            const pattern = Pattern(_pattern)
+        match (schemata, callback) {
             // If a tuple that matches the specified pattern can not be found
             // in the space at the moment register the callback to retry
             // matching the pattern when a new tuple is added.
-            const tuple = find(pattern)
+            const tuple = find(schemata)
             if (tuple !== undefined) {
                 return callback(tuple)
             }
 
             const tryMatchingWithNewTuple = tuple => { // eslint-disable-line no-shadow
-                if (!pattern.match(tuple)) {
+                if (!match(schemata, tuple)) {
                     return
                 }
                 emitter.removeListener(
