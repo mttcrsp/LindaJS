@@ -8,8 +8,10 @@ const async = require('async')
 const Agent = require('./Agent')
 const Pattern = require('./Pattern')
 
+const INITIALIZATION_ERROR = new Error('Expected initial tuples to be an array of tuples (aka array of objects).')
 const VALIDATION_ERROR = new Error('The tuple was rejected by some validator function.')
-const NOT_FOUND_ERROR = new Error('You are trying to delete a tuple that does not belong to the space.')
+const TUPLE_NOT_FOUND_ERROR = new Error('You are trying to delete a tuple that does not belong to the space.')
+const ROLE_NOT_FOUND_ERROR = new Error('This role is not defined. Declare it on the space')
 
 const NEW_TUPLE_EVENT = 'newTuple'
 
@@ -20,7 +22,7 @@ const Space = (initialTuples) => {
     // complicated because of the need to take into account any possibile
     // type.
     if (initialTuples && !Array.isArrayOfObjects(initialTuples)) {
-        throw new Error('Expected initial tuples to be an array of tuples (aka array of objects).')
+        throw INITIALIZATION_ERROR
     }
 
     const tuples = initialTuples || []
@@ -29,7 +31,6 @@ const Space = (initialTuples) => {
     const roles = []
 
     const validators = []
-
     const eventHandlers = {
         onWillAdd: [],
         onDidAdd: [],
@@ -90,7 +91,7 @@ const Space = (initialTuples) => {
         remove (tuple, cb) {
             const index = tuples.indexOf(tuple)
             if (index === -1) {
-                return cb(NOT_FOUND_ERROR)
+                return cb(TUPLE_NOT_FOUND_ERROR)
             }
 
             const willRemove = (
@@ -180,7 +181,7 @@ const Space = (initialTuples) => {
             }
 
             if (roles.indexOf(role) === -1) {
-                throw new Error('This role is not defined. Declare it on the space')
+                throw ROLE_NOT_FOUND_ERROR
             }
 
             return Agent(this, role)
