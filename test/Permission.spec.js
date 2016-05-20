@@ -6,7 +6,7 @@ const expect = require('expect')
 
 const Permission = require('../src/Permission')
 const Operation = require('../src/Operation')
-const _ = require('../src/Pattern').WILDCARD
+const _ = require('../src/Matcher').WILDCARD
 
 describe('Permission', function () {
     const tuple = {

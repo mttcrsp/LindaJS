@@ -1,10 +1,16 @@
 const Operation = require('./Operation')
-const Pattern = require('./Pattern')
+const match = require('./Matcher').match
 
 const Permission = (type, operand) => {
     const types = Object.keys(Operation.TYPE)
     if (types.indexOf(type) === -1) {
         throw new Error('Expected type to be a valid operation type.')
+    }
+
+    const isSubpattern = (schemata, otherSchemata) => {
+        return (
+            match(schemata, otherSchemata) !== undefined
+        )
     }
 
     return {
@@ -13,19 +19,16 @@ const Permission = (type, operand) => {
                 return false
             }
 
-            const pattern = Pattern(operand)
-
             switch (operation.type) {
                 case Operation.TYPE.OUT:
                 case Operation.TYPE.EVAL:
-                    const match = pattern.match(operation.operand)
-                    return match !== undefined
+                    const result = match(operand, operation.operand)
+                    return result !== undefined
                 case Operation.TYPE.IN:
                 case Operation.TYPE.RD:
                 case Operation.TYPE.INP:
                 case Operation.TYPE.RDP:
-                    const otherPattern = Pattern(operation.operand)
-                    return otherPattern.isSubpattern(pattern)
+                    return isSubpattern(operand, operation.operand)
                 default:
                     return false
             }

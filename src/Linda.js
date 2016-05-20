@@ -1,7 +1,7 @@
 module.exports = {
     Space: require('./Space'),
     Operation: require('./Operation'),
-    Pattern: require('./Pattern'),
+    Pattern: require('./Matcher'),
     Role: require('./Role'),
     Permission: require('./Permission')
 }
