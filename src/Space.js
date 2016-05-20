@@ -46,6 +46,21 @@ const Space = (initialTuples) => {
         )
     }
 
+    const add = (tuple, cb) => {
+        tuples.push(tuple)
+        cb()
+    }
+
+    const remove = (tuple, cb) => {
+        const index = tuples.indexOf(tuple)
+        if (index === -1) {
+            return cb(TUPLE_NOT_FOUND_ERROR)
+        }
+
+        tuples.splice(index, 1)
+        cb()
+    }
+
     return {
         getTuples () {
             // Fastest way to clone an array
@@ -73,10 +88,7 @@ const Space = (initialTuples) => {
 
             async.series([
                 ...willAdd,
-                (innercb) => {
-                    tuples.push(tuple)
-                    innercb()
-                },
+                async.apply(add, tuple),
                 ...didAdd
             ], err => {
                 if (err) {
@@ -108,10 +120,7 @@ const Space = (initialTuples) => {
 
             async.series([
                 ...willRemove,
-                (innercb) => {
-                    tuples.splice(index, 1)
-                    innercb()
-                },
+                async.apply(remove, tuple),
                 ...didRemove
             ], err => {
                 if (err) {
