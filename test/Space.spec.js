@@ -217,12 +217,6 @@ describe('Space', function() {
 
             const agent = space.createAgent(Admin)
 
-            const operation = Operation(
-                Operation.TYPE.IN,
-                pattern
-            )
-            console.log(User.can(operation))
-
             agent.in(pattern, (err, removed) => {
                 expect(err).toNotExist()
                 expect(removed).toExist()
