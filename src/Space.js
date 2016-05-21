@@ -176,7 +176,7 @@ const Space = (injectedStore) => {
                         NEW_TUPLE_EVENT,
                         tryMatchingWithNewTuple
                     )
-                    cb(undefined, tuple)
+                    async.nextTick(cb, undefined, tuple)
                 }
                 emitter.on(NEW_TUPLE_EVENT, tryMatchingWithNewTuple)
             })
