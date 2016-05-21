@@ -149,28 +149,34 @@ describe('Space', function() {
 
     describe('#verify(pattern, callback)', function () {
         it('should match with tuples that are already available', function (done) {
-            space.add(tuple, () => {
-                expect(
-                    space.verify(pattern)
-                ).toBe(tuple)
+            series([
+                apply(space.add, tuple),
+                apply(space.verify, pattern)
+            ], (err, res) => {
+                expect(err).toNotExist()
+                expect(res[1]).toBe(tuple)
                 done()
             })
         })
 
-        it('should not match with tuples that are not yet available', function () {
-            expect(
-                space.verify(pattern)
-            ).toNotExist()
+        it('should not match with tuples that are not yet available', function (done) {
+            space.verify(pattern, (err, res) => {
+                expect(err).toNotExist()
+                expect(res).toNotExist()
+                done()
+            })
         })
     })
 
     describe('#match(pattern, callback)', function () {
         it('should match with tuples that are already available', function (done) {
-            space.add(tuple, () => {
-                space.match(pattern, match => {
-                    expect(match).toBe(tuple)
-                    done()
-                })
+            series([
+                apply(space.add, tuple),
+                apply(space.match, pattern)
+            ], (err, res) => {
+                expect(err).toNotExist()
+                expect(res[1]).toBe(tuple)
+                done()
             })
         })
 
@@ -179,8 +185,8 @@ describe('Space', function() {
                 space.add(tuple, () => {})
             }, 100)
 
-            space.match(pattern, result => {
-                expect(result).toBe(tuple)
+            space.match(pattern, (err, res) => {
+                expect(res).toBe(tuple)
                 done()
             })
         })
