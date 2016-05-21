@@ -55,7 +55,38 @@ describe('Space', function() {
         space.addValidator(t => t.invalid !== true)
     })
 
-    describe('#constructor', function () { })
+    describe('#constructor(store)', function () {
+        it('should set itself up with the provided store', function () {
+            const store = {
+                getTuples () {
+                    return [tuple]
+                },
+                add () { },
+                remove () { },
+                find () { }
+            }
+            space = Space(store)
+
+            const tuples = space.getTuples()
+            expect(tuples).toExist()
+            expect(tuples.length).toBe(1)
+            expect(tuples[0]).toBe(tuple)
+        })
+
+        it('should default to an in memory store if no store was provided', function () {
+            space = Space()
+
+            const tuples = space.getTuples()
+            expect(tuples).toExist()
+            expect(tuples.length).toBe(0)
+        })
+
+        it('should should throw an error if the provided store is not compatible', function () {
+            expect(() => {
+                Space([])
+            }).toThrow()
+        })
+    })
 
     describe('#add(tuple, cb)', function () {
         it('should add tuples', function (done) {
