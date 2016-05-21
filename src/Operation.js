@@ -34,15 +34,12 @@ const Operation = (type, operand) => {
             break
         case Operation.TYPE.INP:
             operation = (space, cb) => {
-                async.waterfall([
-                    async.apply(space.verify, operand),
-                    (tuple, innercb) => {
-                        if (!tuple) {
-                            return innercb()
-                        }
-                        space.remove(tuple, innercb)
+                space.verify(operand, (err, tuple) => {
+                    if (!tuple) {
+                        return cb()
                     }
-                ], cb)
+                    space.remove(tuple, cb)
+                })
             }
             break
         case Operation.TYPE.RD:
