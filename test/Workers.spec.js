@@ -125,12 +125,14 @@ describe('Worker', function () {
                 cb()
             }
 
-            space = Space([tuple])
-
+            space = Space()
             space.onWillRemove(work)
             space.onWillRemove(work)
 
-            space.remove(tuple, () => {})
+            series([
+                async.apply(space.add, tuple),
+                async.apply(space.remove, tuple)
+            ])
         })
     })
 
@@ -151,12 +153,14 @@ describe('Worker', function () {
                 cb()
             }
 
-            space = Space([tuple])
-
+            space = Space()
             space.onDidRemove(work)
             space.onDidRemove(work)
 
-            space.remove(tuple, () => {})
+            series([
+                async.apply(space.add, tuple),
+                async.apply(space.remove, tuple)
+            ])
         })
     })
 })

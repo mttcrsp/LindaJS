@@ -55,22 +55,7 @@ describe('Space', function() {
         space.addValidator(t => t.invalid !== true)
     })
 
-    describe('#constructor(tuples)', function () {
-        it('should correctly initialize the tuples space if an initial value is provided', function () {
-            space = Space([tuple, otherTuple])
-            expect(space.getTuples().length).toBe(2)
-        })
-
-        it('should error if the provided value is not a array of tuples', function () {
-            expect(() => {
-                Space(1)
-            }).toThrow()
-
-            expect(() => {
-                Space([1, 2, 3])
-            }).toThrow()
-        })
-    })
+    describe('#constructor', function () { })
 
     describe('#add(tuple, cb)', function () {
         it('should add tuples', function (done) {
@@ -217,15 +202,18 @@ describe('Space', function() {
         })
 
         it('should allow authorized operations', function (done) {
-            space = Space([tuple])
+            space = Space()
 
             space.addRoles([User, Admin])
 
             const agent = space.createAgent(Admin)
 
-            agent.in(pattern, (err, removed) => {
+            series([
+                apply(space.add, tuple),
+                apply(agent.in, pattern)
+            ], (err, res) => {
                 expect(err).toNotExist()
-                expect(removed).toExist()
+                expect(res[1]).toExist()
 
                 const tuples = space.getTuples()
                 expect(tuples.length).toBe(0)
