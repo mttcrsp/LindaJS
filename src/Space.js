@@ -8,15 +8,58 @@ const async = require('async')
 const Agent = require('./Agent')
 const match = require('./Matcher').match
 
-const INITIALIZATION_ERROR = new Error('Expected initial tuples to be an array of tuples (aka array of objects).')
+const INITIALIZATION_ERROR = new Error('This store is not compatible. A store is expected to provided getTuples, add, remove and find functions.')
 const VALIDATION_ERROR = new Error('The tuple was rejected by some validator function.')
 const TUPLE_NOT_FOUND_ERROR = new Error('You are trying to delete a tuple that does not belong to the space.')
-const ROLE_NOT_FOUND_ERROR = new Error('This role is not defined. Declare it on the space')
+const ROLE_NOT_FOUND_ERROR = new Error('This role is not defined. Declare it on the space before trying to use it.')
 
 const NEW_TUPLE_EVENT = 'newTuple'
 
-const Space = () => {
-    const tuples = []
+const Store = initialTuples => {
+    const tuples = initialTuples || []
+    return {
+        getTuples() {
+            return tuples.slice()
+        },
+        find (schemata, cb) {
+            async.nextTick(() => {
+                const result = _.find(
+                    tuples, async.apply(match, schemata)
+                )
+                cb(undefined, result)
+            })
+        },
+        add (tuple, cb) {
+            async.nextTick(() => {
+                tuples.push(tuple)
+                cb()
+            })
+        },
+        remove (tuple, cb) {
+            const index = tuples.indexOf(tuple)
+            if (index === -1) {
+                return cb(TUPLE_NOT_FOUND_ERROR)
+            }
+
+            async.nextTick(() => {
+                tuples.splice(index, 1)
+                cb()
+            })
+        }
+    }
+}
+
+const Space = (injectedStore) => {
+    if (injectedStore && (
+        !injectedStore.add ||
+        !injectedStore.remove ||
+        !injectedStore.find ||
+        !injectedStore.getTuples
+    )) {
+        throw INITIALIZATION_ERROR
+    }
+
+    const store = injectedStore || Store()
     const emitter = new EventEmitter()
 
     const roles = []
@@ -29,40 +72,9 @@ const Space = () => {
         onDidRemove: []
     }
 
-    // Looks for the first tuple that matches the specified tuple schemata in
-    // the space.
-    const find = (schemata, cb) => {
-        async.nextTick(() => {
-            const result = _.find(
-                tuples, async.apply(match, schemata)
-            )
-            cb(undefined, result)
-        })
-    }
-
-    const add = (tuple, cb) => {
-        async.nextTick(() => {
-            tuples.push(tuple)
-            cb()
-        })
-    }
-
-    const remove = (tuple, cb) => {
-        const index = tuples.indexOf(tuple)
-        if (index === -1) {
-            return cb(TUPLE_NOT_FOUND_ERROR)
-        }
-
-        async.nextTick(() => {
-            tuples.splice(index, 1)
-            cb()
-        })
-    }
-
     return {
         getTuples () {
-            // Fastest way to clone an array
-            return tuples.slice()
+            return store.getTuples()
         },
         add (tuple, cb) {
             const isValidTuple = _.every(
@@ -86,7 +98,7 @@ const Space = () => {
 
             async.series([
                 ...willAdd,
-                async.apply(add, tuple),
+                async.apply(store.add, tuple),
                 ...didAdd
             ], err => {
                 if (err) {
@@ -98,6 +110,15 @@ const Space = () => {
             })
         },
         remove (tuple, cb) {
+            const ensureExistence = innercb => {
+                store.find(tuple, (err, found) => {
+                    if (!found) {
+                        return innercb(TUPLE_NOT_FOUND_ERROR)
+                    }
+                    innercb()
+                })
+            }
+
             const willRemove = (
                 eventHandlers.onWillRemove
             ).map(
@@ -111,15 +132,9 @@ const Space = () => {
             )
 
             async.series([
-                innercb => {
-                    const index = tuples.indexOf(tuple)
-                    if (index === -1) {
-                        return innercb(TUPLE_NOT_FOUND_ERROR)
-                    }
-                    innercb()
-                },
+                ensureExistence,
                 ...willRemove,
-                async.apply(remove, tuple),
+                async.apply(store.remove, tuple),
                 ...didRemove
             ], err => {
                 if (err) {
@@ -138,13 +153,13 @@ const Space = () => {
         //   callback when one it is found. Look below to see the details of
         //   how this indefinitely running search is implemented.
         verify (schemata, cb) {
-            find(schemata, cb)
+            store.find(schemata, cb)
         },
         match (schemata, cb) {
             // If a tuple that matches the specified pattern can not be found
             // in the space at the moment register the callback to retry
             // matching the pattern when a new tuple is added.
-            find(schemata, (err, tuple) => {
+            store.find(schemata, (err, tuple) => {
                 if (err) {
                     return cb(err)
                 }
