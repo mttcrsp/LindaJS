@@ -40,15 +40,20 @@ const Space = (initialTuples) => {
 
     // Looks for the first tuple that matches the specified tuple schemata in
     // the space.
-    const find = schemata => {
-        return _.find(
-            tuples, async.apply(match, schemata)
-        )
+    const find = (schemata, cb) => {
+        async.nextTick(() => {
+            const result = _.find(
+                tuples, async.apply(match, schemata)
+            )
+            cb(undefined, result)
+        })
     }
 
     const add = (tuple, cb) => {
-        tuples.push(tuple)
-        cb()
+        async.nextTick(() => {
+            tuples.push(tuple)
+            cb()
+        })
     }
 
     const remove = (tuple, cb) => {
@@ -57,8 +62,10 @@ const Space = (initialTuples) => {
             return cb(TUPLE_NOT_FOUND_ERROR)
         }
 
-        tuples.splice(index, 1)
-        cb()
+        async.nextTick(() => {
+            tuples.splice(index, 1)
+            cb()
+        })
     }
 
     return {
@@ -96,16 +103,10 @@ const Space = (initialTuples) => {
                 }
 
                 emitter.emit(NEW_TUPLE_EVENT, tuple)
-
                 cb(undefined, tuple)
             })
         },
         remove (tuple, cb) {
-            const index = tuples.indexOf(tuple)
-            if (index === -1) {
-                return cb(TUPLE_NOT_FOUND_ERROR)
-            }
-
             const willRemove = (
                 eventHandlers.onWillRemove
             ).map(
@@ -119,6 +120,13 @@ const Space = (initialTuples) => {
             )
 
             async.series([
+                innercb => {
+                    const index = tuples.indexOf(tuple)
+                    if (index === -1) {
+                        return innercb(TUPLE_NOT_FOUND_ERROR)
+                    }
+                    innercb()
+                },
                 ...willRemove,
                 async.apply(remove, tuple),
                 ...didRemove
@@ -132,34 +140,40 @@ const Space = (initialTuples) => {
         // This two functions implement the two necessary search types, non
         // blocking and blocking:
         // - Verify verifies if a tuple matching the provided predicate can be
-        //   found in the space and immediately returns with a matching tuple or
+        //   found in the space and immediately returns with a matching tuple
+        //   or
         //   undefined if no matching tuple can be found.
         // - Match looks for a matching tuple indefinetly and invokes the
         //   callback when one it is found. Look below to see the details of
         //   how this indefinitely running search is implemented.
-        verify (schemata) {
-            return find(schemata)
+        verify (schemata, cb) {
+            find(schemata, cb)
         },
-        match (schemata, callback) {
+        match (schemata, cb) {
             // If a tuple that matches the specified pattern can not be found
             // in the space at the moment register the callback to retry
             // matching the pattern when a new tuple is added.
-            const tuple = find(schemata)
-            if (tuple !== undefined) {
-                return callback(tuple)
-            }
-
-            const tryMatchingWithNewTuple = tuple => { // eslint-disable-line no-shadow
-                if (!match(schemata, tuple)) {
-                    return
+            find(schemata, (err, tuple) => {
+                if (err) {
+                    return cb(err)
                 }
-                emitter.removeListener(
-                    NEW_TUPLE_EVENT,
-                    tryMatchingWithNewTuple
-                )
-                callback(tuple)
-            }
-            emitter.on(NEW_TUPLE_EVENT, tryMatchingWithNewTuple)
+
+                if (tuple) {
+                    return cb(undefined, tuple)
+                }
+
+                const tryMatchingWithNewTuple = tuple => { // eslint-disable-line no-shadow
+                    if (!match(schemata, tuple)) {
+                        return
+                    }
+                    emitter.removeListener(
+                        NEW_TUPLE_EVENT,
+                        tryMatchingWithNewTuple
+                    )
+                    cb(undefined, tuple)
+                }
+                emitter.on(NEW_TUPLE_EVENT, tryMatchingWithNewTuple)
+            })
         },
         addValidator (validator) {
             validators.push(validator)

@@ -26,32 +26,33 @@ const Operation = (type, operand) => {
         // should be removed.
         case Operation.TYPE.IN:
             operation = (space, cb) => {
-                space.match(operand, tuple => {
-                    space.remove(tuple, cb)
-                })
+                async.waterfall([
+                    async.apply(space.match, operand),
+                    space.remove
+                ], cb)
             }
             break
         case Operation.TYPE.INP:
             operation = (space, cb) => {
-                const tuple = space.verify(operand)
-                if (!tuple) {
-                    return cb()
-                }
-                space.remove(tuple, cb)
+                async.waterfall([
+                    async.apply(space.verify, operand),
+                    (tuple, innercb) => {
+                        if (!tuple) {
+                            return innercb()
+                        }
+                        space.remove(tuple, innercb)
+                    }
+                ], cb)
             }
             break
         case Operation.TYPE.RD:
             operation = (space, cb) => {
-                space.match(operand, tuple => {
-                    cb(undefined, tuple)
-                })
+                space.match(operand, cb)
             }
             break
         case Operation.TYPE.RDP:
             operation = (space, cb) => {
-                space.verify(operand, tuple => {
-                    cb(undefined, tuple)
-                })
+                space.verify(operand, cb)
             }
             break
         // The Linda guidelines describe an active tuple as a set of functions
