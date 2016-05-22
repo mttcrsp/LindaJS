@@ -3,6 +3,7 @@
 'use strict'
 
 const expect = require('expect')
+const _ = require('lodash')
 const async = require('async')
 const series = async.series
 const apply = async.apply
@@ -11,9 +12,45 @@ const Space = require('../src/Space')
 const Operation = require('../src/Operation')
 const Permission = require('../src/Permission')
 const Role = require('../src/Role')
+const match = require('../src/Matcher').match
+
+const InspectableStore = () => {
+    const tuples = []
+    return {
+        getTuples () {
+            return tuples
+        },
+        find (schemata, cb) {
+            async.nextTick(() => {
+                const result = _.find(
+                    tuples, async.apply(match, schemata)
+                )
+                cb(undefined, result)
+            })
+        },
+        add (tuple, cb) {
+            async.nextTick(() => {
+                tuples.push(tuple)
+                cb()
+            })
+        },
+        remove (tuple, cb) {
+            const index = tuples.indexOf(tuple)
+            if (index === -1) {
+                return cb(TUPLE_NOT_FOUND_ERROR)
+            }
+
+            async.nextTick(() => {
+                tuples.splice(index, 1)
+                cb()
+            })
+        }
+    }
+}
 
 describe('Space', function() {
     let space
+    let store
 
     const tuple = {
         id: 1,
@@ -51,13 +88,14 @@ describe('Space', function() {
     const Admin = Role([write], [User])
 
     beforeEach(function () {
-        space = Space()
+        store = InspectableStore()
+        space = Space(store)
         space.addValidator(t => t.invalid !== true)
     })
 
     describe('#constructor(store)', function () {
         it('should set itself up with the provided store', function () {
-            const store = {
+            const store = { // eslint-disable-line no-shadow
                 getTuples () {
                     return [tuple]
                 },
@@ -67,18 +105,28 @@ describe('Space', function() {
             }
             space = Space(store)
 
-            const tuples = space.getTuples()
+            const tuples = store.getTuples()
             expect(tuples).toExist()
             expect(tuples.length).toBe(1)
             expect(tuples[0]).toBe(tuple)
         })
 
-        it('should default to an in memory store if no store was provided', function () {
+        it('should default to an in memory store if no store was provided', function (done) {
             space = Space()
 
-            const tuples = space.getTuples()
-            expect(tuples).toExist()
-            expect(tuples.length).toBe(0)
+            series([
+                apply(space.add, tuple),
+                apply(space.verify, pattern),
+                apply(space.remove, tuple),
+                apply(space.verify, pattern)
+            ], (err, res) => {
+                expect(err).toNotExist()
+                expect(res[0]).toExist()
+                expect(res[1]).toExist()
+                expect(res[2]).toExist()
+                expect(res[3]).toNotExist()
+                done()
+            })
         })
 
         it('should should throw an error if the provided store is not compatible', function () {
@@ -96,11 +144,10 @@ describe('Space', function() {
             ], err => {
                 expect(err).toNotExist()
 
-                const tuples = space.getTuples()
+                const tuples = store.getTuples()
                 expect(tuples[0]).toBe(tuple)
                 expect(tuples[1]).toBe(otherTuple)
                 expect(tuples.length).toBe(2)
-
                 done()
             })
         })
@@ -112,11 +159,10 @@ describe('Space', function() {
             ], err => {
                 expect(err).toNotExist()
 
-                const tuples = space.getTuples()
+                const tuples = store.getTuples()
                 expect(tuples[0]).toBe(tuple)
                 expect(tuples[1]).toBe(tuple)
                 expect(tuples.length).toBe(2)
-
                 done()
             })
         })
@@ -124,7 +170,9 @@ describe('Space', function() {
         it('should throw an error if the tuple is invalid and not add it to the space', function (done) {
             space.add(invalidTuple, err => {
                 expect(err).toExist()
-                expect(space.getTuples().length).toBe(0)
+
+                const tuples = store.getTuples()
+                expect(tuples.length).toBe(0)
                 done()
             })
         })
@@ -139,9 +187,8 @@ describe('Space', function() {
             ], err => {
                 expect(err).toNotExist()
 
-                const tuples = space.getTuples()
+                const tuples = store.getTuples()
                 expect(tuples[0]).toEqual(otherTuple)
-
                 done()
             })
         })
@@ -154,9 +201,8 @@ describe('Space', function() {
             ], err => {
                 expect(err).toNotExist()
 
-                const tuples = space.getTuples()
+                const tuples = store.getTuples()
                 expect(tuples.length).toEqual(1)
-
                 done()
             })
         })
@@ -215,9 +261,8 @@ describe('Space', function() {
                 expect(err).toNotExist()
                 expect(added).toBe(tuple)
 
-                const tuples = space.getTuples()
+                const tuples = store.getTuples()
                 expect(tuples.length).toEqual(1)
-
                 done()
             })
         })
@@ -246,7 +291,7 @@ describe('Space', function() {
                 expect(err).toNotExist()
                 expect(res[1]).toExist()
 
-                const tuples = space.getTuples()
+                const tuples = store.getTuples()
                 expect(tuples.length).toBe(0)
                 done()
             })
@@ -261,7 +306,7 @@ describe('Space', function() {
                 expect(err).toExist()
                 expect(added).toNotExist()
 
-                const tuples = space.getTuples()
+                const tuples = store.getTuples()
                 expect(tuples.length).toBe(0)
                 done()
             })
