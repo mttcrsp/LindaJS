@@ -5,10 +5,10 @@
 const WILDCARD = new Object()
 
 // Lindas pattern matching implementation are not always described as typed as
-// we saw during during course classes, I decided not to go forfor a typed
-// pattern  matching to keep the implementation lightweight and leave more
-// freedom to users of the library. Given the lack of a good type system in
-// Javascript a strictly typed matching would be a huge pain to use.
+// we saw during during course classes, I decided not to go for a typed pattern
+// matching to keep the implementation lightweight and leave more freedom to
+// users of the library. Given the lack of a good type system in Javascript a
+// strictly typed matching would be a huge pain to use.
 const match = (schemata, tuple) => {
     const keys = Object.keys(schemata)
     const tupleKeys = Object.keys(tuple)

@@ -120,9 +120,9 @@ const Space = (injectedStore) => {
             store.find(schemata, cb)
         },
         match (schemata, cb) {
-            // If a tuple that matches the specified pattern can not be found
-            // in the space at the moment register the callback to retry
-            // matching the pattern when a new tuple is added.
+            // If the space does not contain any tuple matching the specied
+            // schemata at this moment, register a callback to retry matching
+            // the schemata whenever a new tuple is added.
             store.find(schemata, (err, tuple) => {
                 if (err) {
                     return cb(err)
