@@ -7,7 +7,7 @@ const async = require('async')
 const series = async.series
 const apply = async.apply
 
-const Space = require('../src/Space')
+const Space = require('./TestSpace')
 
 describe('Worker', function () {
     let space
@@ -126,6 +126,7 @@ describe('Worker', function () {
             }
 
             space = Space()
+
             space.onWillRemove(work)
             space.onWillRemove(work)
 
@@ -154,6 +155,7 @@ describe('Worker', function () {
             }
 
             space = Space()
+
             space.onDidRemove(work)
             space.onDidRemove(work)
 

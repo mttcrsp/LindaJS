@@ -4,7 +4,7 @@
 
 const expect = require('expect')
 
-const Space = require('../src/Space')
+const Space = require('./TestSpace')
 
 describe('Agent', function () {
     let space, agent

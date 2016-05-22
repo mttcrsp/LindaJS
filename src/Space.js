@@ -5,49 +5,16 @@ const EventEmitter = require('events').EventEmitter
 const _ = require('lodash')
 const async = require('async')
 
+const Store = require('./Store')
 const Agent = require('./Agent')
 const match = require('./Matcher').match
 
-const INITIALIZATION_ERROR = new Error('This store is not compatible. A store is expected to provided getTuples, add, remove and find functions.')
+const INITIALIZATION_ERROR = new Error('This store is not compatible. A store is expected to provided add, remove and find functions.')
 const VALIDATION_ERROR = new Error('The tuple was rejected by some validator function.')
 const TUPLE_NOT_FOUND_ERROR = new Error('You are trying to delete a tuple that does not belong to the space.')
 const ROLE_NOT_FOUND_ERROR = new Error('This role is not defined. Declare it on the space before trying to use it.')
 
 const NEW_TUPLE_EVENT = 'newTuple'
-
-const Store = initialTuples => {
-    const tuples = initialTuples || []
-    return {
-        getTuples() {
-            return tuples.slice()
-        },
-        find (schemata, cb) {
-            async.nextTick(() => {
-                const result = _.find(
-                    tuples, async.apply(match, schemata)
-                )
-                cb(undefined, result)
-            })
-        },
-        add (tuple, cb) {
-            async.nextTick(() => {
-                tuples.push(tuple)
-                cb()
-            })
-        },
-        remove (tuple, cb) {
-            const index = tuples.indexOf(tuple)
-            if (index === -1) {
-                return cb(TUPLE_NOT_FOUND_ERROR)
-            }
-
-            async.nextTick(() => {
-                tuples.splice(index, 1)
-                cb()
-            })
-        }
-    }
-}
 
 const Space = (injectedStore) => {
     if (injectedStore && (
@@ -73,9 +40,6 @@ const Space = (injectedStore) => {
     }
 
     return {
-        getTuples () {
-            return store.getTuples()
-        },
         add (tuple, cb) {
             const isValidTuple = _.every(
                 validators, validator => validator(tuple)
