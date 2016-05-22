@@ -17,7 +17,7 @@ describe('Agent', function () {
         invalid: true
     }
 
-    const pattern = {
+    const schemata = {
         id: 1,
         name: 'Bob'
     }
@@ -35,7 +35,7 @@ describe('Agent', function () {
 
     it('should not be able to operate on the space while blocked', function (done) {
         // Given that the space is empty this operation should block the agent
-        agent.in(pattern, () => {})
+        agent.in(schemata, () => {})
 
         agent.out(tuple, err => {
             expect(err).toExist()
@@ -67,10 +67,10 @@ describe('Agent', function () {
         })
     })
 
-    describe('#rd(pattern, callback)', function () {
+    describe('#rd(schemata, callback)', function () {
         it('should return a tuple if the tuple is already in the space without removing it', function (done) {
             space.add(tuple, () => {
-                agent.rd(pattern, (err, res) => {
+                agent.rd(schemata, (err, res) => {
                     expect(err).toNotExist()
                     expect(res).toBe(tuple)
                     done()
@@ -83,7 +83,7 @@ describe('Agent', function () {
                 space.add(tuple, () => {})
             }, 100)
 
-            agent.rd(pattern, (err, res) => {
+            agent.rd(schemata, (err, res) => {
                 expect(err).toNotExist()
                 expect(res).toBe(tuple)
                 done()
@@ -91,10 +91,10 @@ describe('Agent', function () {
         })
     })
 
-    describe('#in(pattern, callback)', function () {
+    describe('#in(schemata, callback)', function () {
         it('should return a tuple if the tuple is already in the space and then delete it', function (done) {
             space.add(tuple, () => {
-                agent.in(pattern, (err, res) => {
+                agent.in(schemata, (err, res) => {
                     expect(err).toNotExist()
                     expect(res).toBe(tuple)
 
@@ -111,7 +111,7 @@ describe('Agent', function () {
                 space.add(tuple, () => {})
             }, 100)
 
-            agent.in(pattern, (err, res) => {
+            agent.in(schemata, (err, res) => {
                 expect(err).toNotExist()
                 expect(res).toBe(tuple)
 
@@ -123,11 +123,11 @@ describe('Agent', function () {
         })
     })
 
-    describe('#inp(pattern, callback)', function () {
+    describe('#inp(schemata, callback)', function () {
         it('should return a tuple if the tuple is already in the space and then delete it', function (done) {
             space.add(tuple, () => {})
 
-            agent.inp(pattern, (err, res) => {
+            agent.inp(schemata, (err, res) => {
                 expect(err).toNotExist()
                 expect(res).toBe(tuple)
 
@@ -143,7 +143,7 @@ describe('Agent', function () {
                 space.add(tuple, () => {})
             }, 100)
 
-            agent.inp(pattern, (err, res) => {
+            agent.inp(schemata, (err, res) => {
                 expect(err).toNotExist()
                 expect(res).toNotExist()
                 done()

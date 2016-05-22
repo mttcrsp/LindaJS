@@ -16,7 +16,7 @@ const Operation = (type, operand) => {
             }
             break
         // In, inp, rd, rdp all follow the same pattern of execution. They all
-        // schedule the search for a tuple matching the provided pattern and
+        // schedule the search for a tuple matching the provided schemata and
         // call the callback function. They differ in the way that the search
         // works (p vs non-p) and whether they required the removal the
         // matching tuple from the space or not (in* vs rd*). This function

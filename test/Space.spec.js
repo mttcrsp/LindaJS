@@ -64,7 +64,7 @@ describe('Space', function() {
         invalid: true
     }
 
-    const pattern = {
+    const schemata = {
         id: 1,
         name: 'Bob'
     }
@@ -116,9 +116,9 @@ describe('Space', function() {
 
             series([
                 apply(space.add, tuple),
-                apply(space.verify, pattern),
+                apply(space.verify, schemata),
                 apply(space.remove, tuple),
-                apply(space.verify, pattern)
+                apply(space.verify, schemata)
             ], (err, res) => {
                 expect(err).toNotExist()
                 expect(res[0]).toExist()
@@ -209,11 +209,11 @@ describe('Space', function() {
     })
 
 
-    describe('#verify(pattern, callback)', function () {
+    describe('#verify(schemata, callback)', function () {
         it('should match with tuples that are already available', function (done) {
             series([
                 apply(space.add, tuple),
-                apply(space.verify, pattern)
+                apply(space.verify, schemata)
             ], (err, res) => {
                 expect(err).toNotExist()
                 expect(res[1]).toBe(tuple)
@@ -222,7 +222,7 @@ describe('Space', function() {
         })
 
         it('should not match with tuples that are not yet available', function (done) {
-            space.verify(pattern, (err, res) => {
+            space.verify(schemata, (err, res) => {
                 expect(err).toNotExist()
                 expect(res).toNotExist()
                 done()
@@ -230,11 +230,11 @@ describe('Space', function() {
         })
     })
 
-    describe('#match(pattern, callback)', function () {
+    describe('#match(schemata, callback)', function () {
         it('should match with tuples that are already available', function (done) {
             series([
                 apply(space.add, tuple),
-                apply(space.match, pattern)
+                apply(space.match, schemata)
             ], (err, res) => {
                 expect(err).toNotExist()
                 expect(res[1]).toBe(tuple)
@@ -247,7 +247,7 @@ describe('Space', function() {
                 space.add(tuple, () => {})
             }, 100)
 
-            space.match(pattern, (err, res) => {
+            space.match(schemata, (err, res) => {
                 expect(res).toBe(tuple)
                 done()
             })
@@ -286,7 +286,7 @@ describe('Space', function() {
 
             series([
                 apply(space.add, tuple),
-                apply(agent.in, pattern)
+                apply(agent.in, schemata)
             ], (err, res) => {
                 expect(err).toNotExist()
                 expect(res[1]).toExist()

@@ -17,7 +17,7 @@ const UNAUTHORIZED_ERROR = new Error('This agent is not authorized to perform th
 // Based on this idea this implementation of the Linda model implements
 // operations this way:
 // - p operations search the space and immediatly invoke the callback with a
-//   tuple matching the pattern or undefined if no tuple matching the pattern
+//   tuple matching the schemata or undefined if no tuple matching the schemata
 //   is found is found
 // - non-p operations 'block' waiting for a matching tuple to be added to the
 //   space before returning.
@@ -50,20 +50,20 @@ const Agent = (space, role) => {
             const operation = Operation(Operation.TYPE.OUT, tuple)
             execute(operation, cb)
         },
-        in (pattern, cb) {
-            const operation = Operation(Operation.TYPE.IN, pattern)
+        in (schemata, cb) {
+            const operation = Operation(Operation.TYPE.IN, schemata)
             execute(operation, cb)
         },
-        inp (pattern, cb) {
-            const operation = Operation(Operation.TYPE.INP, pattern)
+        inp (schemata, cb) {
+            const operation = Operation(Operation.TYPE.INP, schemata)
             execute(operation, cb)
         },
-        rd (pattern, cb) {
-            const operation = Operation(Operation.TYPE.RD, pattern)
+        rd (schemata, cb) {
+            const operation = Operation(Operation.TYPE.RD, schemata)
             execute(operation, cb)
         },
-        rdp (pattern, cb) {
-            const operation = Operation(Operation.TYPE.RDP, pattern)
+        rdp (schemata, cb) {
+            const operation = Operation(Operation.TYPE.RDP, schemata)
             execute(operation, cb)
         },
         eval (activeTuple, cb) {

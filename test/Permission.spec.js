@@ -13,15 +13,15 @@ describe('Permission', function () {
         id: 1,
         name: 'Bob'
     }
-    const pattern = {
+    const schemata = {
         id: 1,
         name: 'Bob'
     }
-    const otherPattern = {
+    const otherSchemata = {
         id: 2,
         name: 'Alice'
     }
-    const genericPattern = {
+    const genericSchemata = {
         id: 1,
         name: _
     }
@@ -39,7 +39,7 @@ describe('Permission', function () {
             const write = Operation(Operation.TYPE.OUT, tuple)
             const permission = Permission(
                 Operation.TYPE.OUT,
-                pattern
+                schemata
             )
             expect(
                 permission.authorizes(write)
@@ -50,7 +50,7 @@ describe('Permission', function () {
             const write = Operation(Operation.TYPE.OUT, tuple)
             const permission = Permission(
                 Operation.TYPE.IN,
-                pattern
+                schemata
             )
             expect(
                 permission.authorizes(write)
@@ -58,10 +58,10 @@ describe('Permission', function () {
         })
 
         it('should return false for operation with an incompatible operand', function () {
-            const read = Operation(Operation.TYPE.IN, pattern)
+            const read = Operation(Operation.TYPE.IN, schemata)
             const readPermission = Permission(
                 Operation.TYPE.IN,
-                otherPattern
+                otherSchemata
             )
             expect(
                 readPermission.authorizes(read)
@@ -70,7 +70,7 @@ describe('Permission', function () {
             const write = Operation(Operation.TYPE.OUT, tuple)
             const writePermission = Permission(
                 Operation.TYPE.OUT,
-                otherPattern
+                otherSchemata
             )
             expect(
                 writePermission.authorizes(write)
@@ -80,11 +80,11 @@ describe('Permission', function () {
         it('should return true for more specific operations', function () {
             const write = Operation(
                 Operation.TYPE.IN,
-                pattern
+                schemata
             )
             const permission = Permission(
                 Operation.TYPE.IN,
-                genericPattern
+                genericSchemata
             )
             expect(
                 permission.authorizes(write)
@@ -94,11 +94,11 @@ describe('Permission', function () {
         it('should return false for more generic operations', function () {
             const write = Operation(
                 Operation.TYPE.IN,
-                genericPattern
+                genericSchemata
             )
             const permission = Permission(
                 Operation.TYPE.IN,
-                pattern
+                schemata
             )
             expect(
                 permission.authorizes(write)
