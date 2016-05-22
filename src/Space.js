@@ -10,7 +10,6 @@ const Agent = require('./Agent')
 const match = require('./Matcher').match
 
 const INITIALIZATION_ERROR = new Error('This store is not compatible. A store is expected to provided add, remove and find functions.')
-const VALIDATION_ERROR = new Error('The tuple was rejected by some validator function.')
 const TUPLE_NOT_FOUND_ERROR = new Error('You are trying to delete a tuple that does not belong to the space.')
 const ROLE_NOT_FOUND_ERROR = new Error('This role is not defined. Declare it on the space before trying to use it.')
 
@@ -20,8 +19,7 @@ const Space = (injectedStore) => {
     if (injectedStore && (
         !injectedStore.add ||
         !injectedStore.remove ||
-        !injectedStore.find ||
-        !injectedStore.getTuples
+        !injectedStore.find
     )) {
         throw INITIALIZATION_ERROR
     }
