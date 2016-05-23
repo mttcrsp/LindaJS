@@ -3,7 +3,6 @@
 'use strict'
 
 const expect = require('expect')
-const _ = require('lodash')
 const async = require('async')
 const series = async.series
 const apply = async.apply
@@ -12,41 +11,7 @@ const Space = require('../src/Space')
 const Operation = require('../src/Operation')
 const Permission = require('../src/Permission')
 const Role = require('../src/Role')
-const match = require('../src/Matcher').match
-
-const InspectableStore = () => {
-    const tuples = []
-    return {
-        getTuples () {
-            return tuples
-        },
-        find (schemata, cb) {
-            async.nextTick(() => {
-                const result = _.find(
-                    tuples, async.apply(match, schemata)
-                )
-                cb(undefined, result)
-            })
-        },
-        add (tuple, cb) {
-            async.nextTick(() => {
-                tuples.push(tuple)
-                cb()
-            })
-        },
-        remove (tuple, cb) {
-            const index = tuples.indexOf(tuple)
-            if (index === -1) {
-                return cb(TUPLE_NOT_FOUND_ERROR)
-            }
-
-            async.nextTick(() => {
-                tuples.splice(index, 1)
-                cb()
-            })
-        }
-    }
-}
+const InspectableStore = require('./InspectableStore')
 
 describe('Space', function() {
     let space
@@ -180,11 +145,10 @@ describe('Space', function() {
 
     describe('#remove(tuple)', function () {
         it('should remove tuples', function (done) {
-            series([
-                apply(space.add, tuple),
-                apply(space.add, otherTuple),
-                apply(space.remove, tuple)
-            ], err => {
+            store = InspectableStore([tuple, otherTuple])
+            space = Space(store)
+
+            space.remove(tuple, err => {
                 expect(err).toNotExist()
 
                 const tuples = store.getTuples()
@@ -194,11 +158,10 @@ describe('Space', function() {
         })
 
         it('should remove duplicated tuples only once', function (done) {
-            series([
-                apply(space.add, tuple),
-                apply(space.add, tuple),
-                apply(space.remove, tuple)
-            ], err => {
+            store = InspectableStore([tuple, tuple])
+            space = Space(store)
+
+            space.remove(tuple, err => {
                 expect(err).toNotExist()
 
                 const tuples = store.getTuples()
@@ -211,12 +174,12 @@ describe('Space', function() {
 
     describe('#search(schemata, callback)', function () {
         it('should match with tuples that are already available', function (done) {
-            series([
-                apply(space.add, tuple),
-                apply(space.search, schemata)
-            ], (err, res) => {
+            store = InspectableStore([tuple])
+            space = Space(store)
+
+            space.search(schemata, (err, res) => {
                 expect(err).toNotExist()
-                expect(res[1]).toBe(tuple)
+                expect(res).toBe(tuple)
                 done()
             })
         })
@@ -232,12 +195,12 @@ describe('Space', function() {
 
     describe('#searchUntilFound(schemata, callback)', function () {
         it('should match with tuples that are already available', function (done) {
-            series([
-                apply(space.add, tuple),
-                apply(space.searchUntilFound, schemata)
-            ], (err, res) => {
+            store = InspectableStore([tuple])
+            space = Space(store)
+
+            space.searchUntilFound(schemata, (err, res) => {
                 expect(err).toNotExist()
-                expect(res[1]).toBe(tuple)
+                expect(res).toBe(tuple)
                 done()
             })
         })

@@ -7,7 +7,8 @@ const expect = require('expect')
 const Space = require('./TestSpace')
 
 describe('Agent', function () {
-    let space, agent
+    let space
+    let agent
 
     const tuple = {
         id: 1,
@@ -69,12 +70,13 @@ describe('Agent', function () {
 
     describe('#rd(schemata, callback)', function () {
         it('should return a tuple if the tuple is already in the space without removing it', function (done) {
-            space.add(tuple, () => {
-                agent.rd(schemata, (err, res) => {
-                    expect(err).toNotExist()
-                    expect(res).toBe(tuple)
-                    done()
-                })
+            space = Space([tuple])
+            agent = space.createAgent()
+
+            agent.rd(schemata, (err, match) => {
+                expect(err).toNotExist()
+                expect(match).toBe(tuple)
+                done()
             })
         })
 
@@ -93,16 +95,17 @@ describe('Agent', function () {
 
     describe('#in(schemata, callback)', function () {
         it('should return a tuple if the tuple is already in the space and then delete it', function (done) {
-            space.add(tuple, () => {
-                agent.in(schemata, (err, res) => {
-                    expect(err).toNotExist()
-                    expect(res).toBe(tuple)
+            space = Space([tuple])
+            agent = space.createAgent()
 
-                    const tuples = space.getTuples()
-                    expect(tuples.length).toEqual(0)
+            agent.in(schemata, (err, res) => {
+                expect(err).toNotExist()
+                expect(res).toBe(tuple)
 
-                    done()
-                })
+                const tuples = space.getTuples()
+                expect(tuples.length).toEqual(0)
+
+                done()
             })
         })
 
@@ -125,7 +128,8 @@ describe('Agent', function () {
 
     describe('#inp(schemata, callback)', function () {
         it('should return a tuple if the tuple is already in the space and then delete it', function (done) {
-            space.add(tuple, () => {})
+            space = Space([tuple])
+            agent = space.createAgent()
 
             agent.inp(schemata, (err, res) => {
                 expect(err).toNotExist()
