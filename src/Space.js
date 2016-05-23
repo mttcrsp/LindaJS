@@ -109,17 +109,16 @@ const Space = (injectedStore) => {
         },
         // This two functions implement the two necessary search types, non
         // blocking and blocking:
-        // - Verify verifies if a tuple matching the provided predicate can be
-        //   found in the space and immediately returns with a matching tuple
-        //   or
-        //   undefined if no matching tuple can be found.
-        // - Match looks for a matching tuple indefinetly and invokes the
-        //   callback when one it is found. Look below to see the details of
-        //   how this indefinitely running search is implemented.
-        verify (schemata, cb) {
+        // - search verifies if a tuple matching the provided predicate can
+        //   be found in the space and immediately returns with a matching
+        //   tuple or undefined if no matching tuple can be found.
+        // - searchUntilFound looks for a matching tuple indefinetely and
+        //   invokes the callback when one it is found. Look below to see the
+        //   details of how this indefinitely running search is implemented.
+        search (schemata, cb) {
             store.find(schemata, cb)
         },
-        match (schemata, cb) {
+        searchUntilFound (schemata, cb) {
             // If the space does not contain any tuple matching the specied
             // schemata at this moment, register a callback to retry matching
             // the schemata whenever a new tuple is added.

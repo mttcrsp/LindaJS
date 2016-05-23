@@ -27,14 +27,14 @@ const Operation = (type, operand) => {
         case Operation.TYPE.IN:
             operation = (space, cb) => {
                 async.waterfall([
-                    async.apply(space.match, operand),
+                    async.apply(space.searchUntilFound, operand),
                     space.remove
                 ], cb)
             }
             break
         case Operation.TYPE.INP:
             operation = (space, cb) => {
-                space.verify(operand, (err, tuple) => {
+                space.search(operand, (err, tuple) => {
                     if (!tuple) {
                         return cb()
                     }
@@ -44,12 +44,12 @@ const Operation = (type, operand) => {
             break
         case Operation.TYPE.RD:
             operation = (space, cb) => {
-                space.match(operand, cb)
+                space.searchUntilFound(operand, cb)
             }
             break
         case Operation.TYPE.RDP:
             operation = (space, cb) => {
-                space.verify(operand, cb)
+                space.search(operand, cb)
             }
             break
         // The Linda guidelines describe an active tuple as a set of functions
