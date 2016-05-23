@@ -116,9 +116,9 @@ describe('Space', function() {
 
             series([
                 apply(space.add, tuple),
-                apply(space.verify, schemata),
+                apply(space.search, schemata),
                 apply(space.remove, tuple),
-                apply(space.verify, schemata)
+                apply(space.search, schemata)
             ], (err, res) => {
                 expect(err).toNotExist()
                 expect(res[0]).toExist()
@@ -209,11 +209,11 @@ describe('Space', function() {
     })
 
 
-    describe('#verify(schemata, callback)', function () {
+    describe('#search(schemata, callback)', function () {
         it('should match with tuples that are already available', function (done) {
             series([
                 apply(space.add, tuple),
-                apply(space.verify, schemata)
+                apply(space.search, schemata)
             ], (err, res) => {
                 expect(err).toNotExist()
                 expect(res[1]).toBe(tuple)
@@ -222,7 +222,7 @@ describe('Space', function() {
         })
 
         it('should not match with tuples that are not yet available', function (done) {
-            space.verify(schemata, (err, res) => {
+            space.search(schemata, (err, res) => {
                 expect(err).toNotExist()
                 expect(res).toNotExist()
                 done()
@@ -230,11 +230,11 @@ describe('Space', function() {
         })
     })
 
-    describe('#match(schemata, callback)', function () {
+    describe('#searchUntilFound(schemata, callback)', function () {
         it('should match with tuples that are already available', function (done) {
             series([
                 apply(space.add, tuple),
-                apply(space.match, schemata)
+                apply(space.searchUntilFound, schemata)
             ], (err, res) => {
                 expect(err).toNotExist()
                 expect(res[1]).toBe(tuple)
@@ -247,7 +247,7 @@ describe('Space', function() {
                 space.add(tuple, () => {})
             }, 100)
 
-            space.match(schemata, (err, res) => {
+            space.searchUntilFound(schemata, (err, res) => {
                 expect(res).toBe(tuple)
                 done()
             })
