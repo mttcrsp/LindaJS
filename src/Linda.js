@@ -1,4 +1,5 @@
 module.exports = {
+		Store: require('./Store'),
     Space: require('./Space'),
     Operation: require('./Operation'),
     Matcher: require('./Matcher'),

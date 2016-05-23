@@ -10,7 +10,6 @@ const Agent = require('./Agent')
 const match = require('./Matcher').match
 
 const INITIALIZATION_ERROR = new Error('This store is not compatible. A store is expected to provided add, remove and find functions.')
-const VALIDATION_ERROR = new Error('The tuple was rejected by some validator function.')
 const TUPLE_NOT_FOUND_ERROR = new Error('You are trying to delete a tuple that does not belong to the space.')
 const ROLE_NOT_FOUND_ERROR = new Error('This role is not defined. Declare it on the space before trying to use it.')
 
@@ -20,8 +19,7 @@ const Space = (injectedStore) => {
     if (injectedStore && (
         !injectedStore.add ||
         !injectedStore.remove ||
-        !injectedStore.find ||
-        !injectedStore.getTuples
+        !injectedStore.find
     )) {
         throw INITIALIZATION_ERROR
     }
@@ -41,14 +39,7 @@ const Space = (injectedStore) => {
 
     return {
         add (tuple, cb) {
-            const isValidTuple = _.every(
-                validators, validator => validator(tuple)
-            )
-            if (!isValidTuple) {
-                return cb(VALIDATION_ERROR)
-            }
-
-            const willAdd = (
+           const willAdd = (
                 eventHandlers.onWillAdd
             ).map(
                 worker => async.apply(worker, tuple)
@@ -61,6 +52,11 @@ const Space = (injectedStore) => {
             )
 
             async.series([
+                innercb => {
+                    async.parallel(validators.map(
+                        validator => async.apply(validator, tuple)
+                    ), innercb)
+                },
                 ...willAdd,
                 async.apply(store.add, tuple),
                 ...didAdd
@@ -129,7 +125,6 @@ const Space = (injectedStore) => {
                 if (err) {
                     return cb(err)
                 }
-
                 if (tuple) {
                     return cb(undefined, tuple)
                 }

@@ -30,7 +30,12 @@ describe('Agent', function () {
 
     beforeEach(function () {
         space = Space()
-        space.addValidator(t => t.invalid !== true)
+        space.addValidator((t, cb) => {
+            if (t.invalid === true) {
+                return cb(new Error('Invalid tuple'))
+            }
+            cb()
+        })
         agent = space.createAgent()
     })
 
