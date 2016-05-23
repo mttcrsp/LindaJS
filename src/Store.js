@@ -16,6 +16,14 @@ const Store = initialTuples => {
                 cb(undefined, result)
             })
         },
+        findAll (schemata, cb) {
+            async.nextTick(() => {
+                const results = tuples.filter(
+                    tuple => match(schemata, tuple)
+                )
+                cb(undefined, results)
+            })
+        },
         add (tuple, cb) {
             async.nextTick(() => {
                 tuples.push(tuple)
