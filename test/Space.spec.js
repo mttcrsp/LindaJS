@@ -193,6 +193,27 @@ describe('Space', function() {
         })
     })
 
+    describe('#searchMany(schemata, callback)', function () {
+        it('should return all of the currently available tuples that match the schemata', function (done) {
+            store = InspectableStore([tuple, tuple])
+            space = Space(store)
+
+            space.searchMany(schemata, (err, res) => {
+                expect(err).toNotExist()
+                expect(res.length).toBe(2)
+                done()
+            })
+        })
+
+        it('should return an empty array if no matching tuple was found', function (done) {
+            space.searchMany(schemata, (err, res) => {
+                expect(err).toNotExist()
+                expect(res.length).toBe(0)
+                done()
+            })
+        })
+    })
+
     describe('#searchUntilFound(schemata, callback)', function () {
         it('should match with tuples that are already available', function (done) {
             store = InspectableStore([tuple])

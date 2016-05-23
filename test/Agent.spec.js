@@ -155,6 +155,50 @@ describe('Agent', function () {
         })
     })
 
+    describe('#rdp(schemata, callback)', function () {
+        it('should return a tuple if the tuple is already in the space', function (done) {
+            space = Space([tuple])
+            agent = space.createAgent()
+
+            agent.rdp(schemata, (err, res) => {
+                expect(err).toNotExist()
+                expect(res).toBe(tuple)
+
+                const tuples = space.getTuples()
+                expect(tuples.length).toEqual(1)
+
+                done()
+            })
+        })
+
+        it('should not return a tuple if the tuple is not in the space and is added at a later moment', function (done) {
+            setTimeout(() => {
+                space.add(tuple, () => {})
+            }, 100)
+
+            agent.rdp(schemata, (err, res) => {
+                expect(err).toNotExist()
+                expect(res).toNotExist()
+                done()
+            })
+        })
+    })
+
+    describe('#rdpAll(schemata, callback)', function () {
+        it('should return all of the tuple matching the schemata that are currently in the space', function (done) {
+            space = Space([tuple, tuple])
+            agent = space.createAgent()
+
+            agent.rdpAll(schemata, (err, res) => {
+                expect(err).toNotExist()
+                expect(res.length).toBe(2)
+                expect(res[0]).toBe(tuple)
+                expect(res[1]).toBe(tuple)
+                done()
+            })
+        })
+    })
+
     describe('#eval(activeTuple, callback)', function () {
         it('should evaluate and add an active tuple to the space', function (done) {
             agent.eval(activeTuple, (err, passiveTuple) => {
