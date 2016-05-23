@@ -52,6 +52,11 @@ const Operation = (type, operand) => {
                 space.search(operand, cb)
             }
             break
+        case Operation.TYPE.RDP_ALL:
+            operation = (space, cb) => {
+                space.searchMany(operand, cb)
+            }
+            break
         // The Linda guidelines describe an active tuple as a set of functions
         // that will be evaluated and become a passive tuple. Thus I decided
         // to model an active tuple as an array of functions that will be
@@ -97,6 +102,7 @@ Operation.TYPE = {
     INP: 'INP',
     RD: 'RD',
     RDP: 'RDP',
+    RDP_ALL: 'RDP_ALL',
     EVAL: 'EVAL'
 }
 

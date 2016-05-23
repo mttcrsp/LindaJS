@@ -28,6 +28,7 @@ const Permission = (type, operand) => {
                 case Operation.TYPE.RD:
                 case Operation.TYPE.INP:
                 case Operation.TYPE.RDP:
+                case Operation.TYPE.RDP_ALL:
                     return isSubpattern(operand, operation.operand)
                 default:
                     return false

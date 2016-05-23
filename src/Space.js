@@ -118,6 +118,9 @@ const Space = (injectedStore) => {
         search (schemata, cb) {
             store.find(schemata, cb)
         },
+        searchMany (schemata, cb) {
+            store.findAll(schemata, cb)
+        },
         searchUntilFound (schemata, cb) {
             // If the space does not contain any tuple matching the specied
             // schemata at this moment, register a callback to retry matching

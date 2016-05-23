@@ -66,6 +66,10 @@ const Agent = (space, role) => {
             const operation = Operation(Operation.TYPE.RDP, schemata)
             execute(operation, cb)
         },
+        rdpAll (schemata, cb) {
+            const operation = Operation(Operation.TYPE.RDP_ALL, schemata)
+            execute(operation, cb)
+        },
         eval (activeTuple, cb) {
             const operation = Operation(Operation.TYPE.EVAL, activeTuple)
             execute(operation, cb)
