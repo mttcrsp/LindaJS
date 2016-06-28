@@ -4,25 +4,26 @@ const createStore = require('./MongoStore')
 const URL = 'mongodb://localhost:27017/linda'
 
 createStore(URL, (storeErr, store) => {
-	if (storeErr) {
-		throw storeErr
-	}
+  if (storeErr) {
+    throw storeErr
+  }
 
-	const space = Linda.Space(store)
-	const agent = space.createAgent()
-	const otherAgent = space.createAgent()
+  const space = Linda.Space(store)
+  const agent = space.createAgent()
+  const otherAgent = space.createAgent()
 
-	const tuple = {
-		name: 'Matteo',
-		age: 23
-	}
+  const tuple = {
+    name: 'Matteo',
+    age: 23
+  }
 
-	agent.in(tuple, (err, res) => {
-		console.log(err, res)
-		store.close()
-	})
+  agent.in(tuple, (err, res) => {
+    console.log(err, res)
+    store.close()
+  })
 
-	setTimeout(() => {
-		otherAgent.out(tuple, () => {}) // eslint-disable-line max-nested-callbacks
-	}, 1000)
+  setTimeout(() => {
+    otherAgent.out(tuple, () => {
+    }) // eslint-disable-line max-nested-callbacks
+  }, 1000)
 })

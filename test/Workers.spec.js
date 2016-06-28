@@ -10,159 +10,161 @@ const apply = async.apply
 const Space = require('./TestSpace')
 
 describe('Worker', function () {
-    let space
+  let space
 
-    const tuple = {
-        id: 1,
-        name: 'Bob'
-    }
+  const tuple = {
+    id: 1,
+    name: 'Bob'
+  }
 
-    describe('workers of different types', function () {
-        it('should be ran in the correct order', function (done) {
-            space = Space()
+  describe('workers of different types', function () {
+    it('should be ran in the correct order', function (done) {
+      space = Space()
 
-            space.onWillAdd((t, cb) => {
-                expect(t).toExist()
-                const tuples = space.getTuples()
-                expect(tuples.length).toEqual(0)
-                cb()
-            })
-            space.onDidAdd((t, cb) => {
-                expect(t).toExist()
-                const tuples = space.getTuples()
-                expect(tuples.length).toEqual(1)
-                cb()
-            })
-            space.onWillRemove((t, cb) => {
-                expect(t).toExist()
-                const tuples = space.getTuples()
-                expect(tuples.length).toEqual(1)
-                cb()
-            })
-            space.onDidRemove((t, cb) => {
-                expect(t).toExist()
-                const tuples = space.getTuples()
-                expect(tuples.length).toEqual(0)
-                cb()
-            })
+      space.onWillAdd((t, cb) => {
+        expect(t).toExist()
+        const tuples = space.getTuples()
+        expect(tuples.length).toEqual(0)
+        cb()
+      })
+      space.onDidAdd((t, cb) => {
+        expect(t).toExist()
+        const tuples = space.getTuples()
+        expect(tuples.length).toEqual(1)
+        cb()
+      })
+      space.onWillRemove((t, cb) => {
+        expect(t).toExist()
+        const tuples = space.getTuples()
+        expect(tuples.length).toEqual(1)
+        cb()
+      })
+      space.onDidRemove((t, cb) => {
+        expect(t).toExist()
+        const tuples = space.getTuples()
+        expect(tuples.length).toEqual(0)
+        cb()
+      })
 
-            series([
-                apply(space.add, tuple),
-                apply(space.remove, tuple)
-            ], err => {
-                expect(err).toNotExist()
-                done()
-            })
-        })
+      series([
+        apply(space.add, tuple),
+        apply(space.remove, tuple)
+      ], err => {
+        expect(err).toNotExist()
+        done()
+      })
     })
+  })
 
-    describe('will add workers', function () {
-        it('should be ran before a tuple is added', function (done) {
-            let count = 0
-            const work = (added, cb) => {
-                expect(added).toBe(tuple)
+  describe('will add workers', function () {
+    it('should be ran before a tuple is added', function (done) {
+      let count = 0
+      const work = (added, cb) => {
+        expect(added).toBe(tuple)
 
-                const tuples = space.getTuples()
-                expect(tuples.length).toEqual(0)
+        const tuples = space.getTuples()
+        expect(tuples.length).toEqual(0)
 
-                count += 1
-                if (count === 2) {
-                    done()
-                }
+        count += 1
+        if (count === 2) {
+          done()
+        }
 
-                cb()
-            }
+        cb()
+      }
 
-            space = Space()
+      space = Space()
 
-            space.onWillAdd(work)
-            space.onWillAdd(work)
+      space.onWillAdd(work)
+      space.onWillAdd(work)
 
-            space.add(tuple, () => {})
-        })
+      space.add(tuple, () => {
+      })
     })
+  })
 
-    describe('did add workers', function () {
-        it('should be ran before a tuple is added', function (done) {
-            let count = 0
-            const work = (added, cb) => {
-                expect(added).toBe(tuple)
+  describe('did add workers', function () {
+    it('should be ran before a tuple is added', function (done) {
+      let count = 0
+      const work = (added, cb) => {
+        expect(added).toBe(tuple)
 
-                const tuples = space.getTuples()
-                expect(tuples.length).toEqual(1)
+        const tuples = space.getTuples()
+        expect(tuples.length).toEqual(1)
 
-                count += 1
-                if (count === 2) {
-                    done()
-                }
+        count += 1
+        if (count === 2) {
+          done()
+        }
 
-                cb()
-            }
+        cb()
+      }
 
-            space = Space()
+      space = Space()
 
-            space.onDidAdd(work)
-            space.onDidAdd(work)
+      space.onDidAdd(work)
+      space.onDidAdd(work)
 
-            space.add(tuple, () => {})
-        })
+      space.add(tuple, () => {
+      })
     })
+  })
 
-    describe('will remove workers', function () {
-        it('should be ran before a tuple is removed', function (done) {
-            let count = 0
-            const work = (removed, cb) => {
-                expect(removed).toExist()
+  describe('will remove workers', function () {
+    it('should be ran before a tuple is removed', function (done) {
+      let count = 0
+      const work = (removed, cb) => {
+        expect(removed).toExist()
 
-                const tuples = space.getTuples()
-                expect(tuples.length).toEqual(1)
+        const tuples = space.getTuples()
+        expect(tuples.length).toEqual(1)
 
-                count += 1
-                if (count === 2) {
-                    done()
-                }
+        count += 1
+        if (count === 2) {
+          done()
+        }
 
-                cb()
-            }
+        cb()
+      }
 
-            space = Space()
+      space = Space()
 
-            space.onWillRemove(work)
-            space.onWillRemove(work)
+      space.onWillRemove(work)
+      space.onWillRemove(work)
 
-            series([
-                async.apply(space.add, tuple),
-                async.apply(space.remove, tuple)
-            ])
-        })
+      series([
+        async.apply(space.add, tuple),
+        async.apply(space.remove, tuple)
+      ])
     })
+  })
 
-    describe('did remove workers', function () {
-        it('should be ran before a tuple is removed', function (done) {
-            let count = 0
-            const work = (removed, cb) => {
-                expect(removed).toExist()
+  describe('did remove workers', function () {
+    it('should be ran before a tuple is removed', function (done) {
+      let count = 0
+      const work = (removed, cb) => {
+        expect(removed).toExist()
 
-                const tuples = space.getTuples()
-                expect(tuples.length).toEqual(0)
+        const tuples = space.getTuples()
+        expect(tuples.length).toEqual(0)
 
-                count += 1
-                if (count === 2) {
-                    done()
-                }
+        count += 1
+        if (count === 2) {
+          done()
+        }
 
-                cb()
-            }
+        cb()
+      }
 
-            space = Space()
+      space = Space()
 
-            space.onDidRemove(work)
-            space.onDidRemove(work)
+      space.onDidRemove(work)
+      space.onDidRemove(work)
 
-            series([
-                async.apply(space.add, tuple),
-                async.apply(space.remove, tuple)
-            ])
-        })
+      series([
+        async.apply(space.add, tuple),
+        async.apply(space.remove, tuple)
+      ])
     })
+  })
 })

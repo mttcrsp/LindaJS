@@ -9,82 +9,82 @@ const Operation = require('../src/Operation')
 const Role = require('../src/Role')
 
 describe('Role', function () {
-    const tuple = {
-        id: 1,
-        name: 'Bob'
-    }
-    const schemata = {
-        id: 1,
-        name: 'Bob'
-    }
+  const tuple = {
+    id: 1,
+    name: 'Bob'
+  }
+  const schemata = {
+    id: 1,
+    name: 'Bob'
+  }
 
-    describe('#constructor', function () {
-        it('should return a role with the specified permissions', function () {
-            const permissions = [
-                Permission(Operation.TYPE.OUT, schemata),
-                Permission(Operation.TYPE.IN, schemata)
-            ]
+  describe('#constructor', function () {
+    it('should return a role with the specified permissions', function () {
+      const permissions = [
+        Permission(Operation.TYPE.OUT, schemata),
+        Permission(Operation.TYPE.IN, schemata)
+      ]
 
-            const role = Role(permissions)
-            expect(
-                role.getPermissions().length
-            ).toBe(2)
-        })
-
-        it('should return a role that inherits permissions from the specified superroles', function () {
-            const permissions = [
-                Permission(Operation.TYPE.OUT, schemata),
-                Permission(Operation.TYPE.IN, schemata)
-            ]
-
-            const parentRole = Role(permissions)
-
-            const newPermission = Permission(
-                Operation.TYPE.EVAL,
-                schemata
-            )
-            const role = Role([newPermission], [parentRole])
-            expect(
-                role.getPermissions().length
-            ).toBe(3)
-        })
-
-        it('should return a role that inherits permissions from multiple parents', function () {
-            const write = Permission(Operation.TYPE.OUT, schemata)
-            const read = Permission(Operation.TYPE.IN, schemata)
-
-            const parent1 = Role([write])
-            const parent2 = Role([read])
-
-            const role = Role([], [parent1, parent2])
-            expect(
-                role.getPermissions().length
-            ).toBe(2)
-        })
+      const role = Role(permissions)
+      expect(
+        role.getPermissions().length
+      ).toBe(2)
     })
 
-    describe('#can(operation)', function () {
-        it('should return true if the role has a compatible permission', function () {
-            const operation = Operation(Operation.TYPE.OUT, tuple)
+    it('should return a role that inherits permissions from the specified superroles', function () {
+      const permissions = [
+        Permission(Operation.TYPE.OUT, schemata),
+        Permission(Operation.TYPE.IN, schemata)
+      ]
 
-            const read = Permission(Operation.TYPE.IN, schemata)
-            const write = Permission(Operation.TYPE.OUT, schemata)
-            const role = Role([read, write])
+      const parentRole = Role(permissions)
 
-            expect(
-                role.can(operation)
-            ).toBe(true)
-        })
-
-        it('should return false if the role does have a compatible permission', function () {
-            const operation = Operation(Operation.TYPE.OUT, tuple)
-
-            const read = Permission(Operation.TYPE.IN, schemata)
-            const role = Role([read])
-
-            expect(
-                role.can(operation)
-            ).toBe(false)
-        })
+      const newPermission = Permission(
+        Operation.TYPE.EVAL,
+        schemata
+      )
+      const role = Role([newPermission], [parentRole])
+      expect(
+        role.getPermissions().length
+      ).toBe(3)
     })
+
+    it('should return a role that inherits permissions from multiple parents', function () {
+      const write = Permission(Operation.TYPE.OUT, schemata)
+      const read = Permission(Operation.TYPE.IN, schemata)
+
+      const parent1 = Role([write])
+      const parent2 = Role([read])
+
+      const role = Role([], [parent1, parent2])
+      expect(
+        role.getPermissions().length
+      ).toBe(2)
+    })
+  })
+
+  describe('#can(operation)', function () {
+    it('should return true if the role has a compatible permission', function () {
+      const operation = Operation(Operation.TYPE.OUT, tuple)
+
+      const read = Permission(Operation.TYPE.IN, schemata)
+      const write = Permission(Operation.TYPE.OUT, schemata)
+      const role = Role([read, write])
+
+      expect(
+        role.can(operation)
+      ).toBe(true)
+    })
+
+    it('should return false if the role does have a compatible permission', function () {
+      const operation = Operation(Operation.TYPE.OUT, tuple)
+
+      const read = Permission(Operation.TYPE.IN, schemata)
+      const role = Role([read])
+
+      expect(
+        role.can(operation)
+      ).toBe(false)
+    })
+  })
 })

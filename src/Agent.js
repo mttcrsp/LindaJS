@@ -27,54 +27,54 @@ const UNAUTHORIZED_ERROR = new Error('This agent is not authorized to perform th
 // will complete (from a practical standpoint until the provided callback
 // won't be invoked by the space).
 const Agent = (space, role) => {
-    let block = false
+  let block = false
 
-    const execute = (operation, cb) => {
-        if (block) {
-            return cb(BLOCKED_ERROR)
-        }
-
-        if (role && !role.can(operation)) {
-            return cb(UNAUTHORIZED_ERROR)
-        }
-
-        block = true
-        operation(space, (err, res) => {
-            block = false
-            cb(err, res)
-        })
+  const execute = (operation, cb) => {
+    if (block) {
+      return cb(BLOCKED_ERROR)
     }
 
-    return {
-        out (tuple, cb) {
-            const operation = Operation(Operation.TYPE.OUT, tuple)
-            execute(operation, cb)
-        },
-        in (schemata, cb) {
-            const operation = Operation(Operation.TYPE.IN, schemata)
-            execute(operation, cb)
-        },
-        inp (schemata, cb) {
-            const operation = Operation(Operation.TYPE.INP, schemata)
-            execute(operation, cb)
-        },
-        rd (schemata, cb) {
-            const operation = Operation(Operation.TYPE.RD, schemata)
-            execute(operation, cb)
-        },
-        rdp (schemata, cb) {
-            const operation = Operation(Operation.TYPE.RDP, schemata)
-            execute(operation, cb)
-        },
-        rdpAll (schemata, cb) {
-            const operation = Operation(Operation.TYPE.RDP_ALL, schemata)
-            execute(operation, cb)
-        },
-        eval (activeTuple, cb) {
-            const operation = Operation(Operation.TYPE.EVAL, activeTuple)
-            execute(operation, cb)
-        }
+    if (role && !role.can(operation)) {
+      return cb(UNAUTHORIZED_ERROR)
     }
+
+    block = true
+    operation(space, (err, res) => {
+      block = false
+      cb(err, res)
+    })
+  }
+
+  return {
+    out (tuple, cb) {
+      const operation = Operation(Operation.TYPE.OUT, tuple)
+      execute(operation, cb)
+    },
+    in (schemata, cb) {
+      const operation = Operation(Operation.TYPE.IN, schemata)
+      execute(operation, cb)
+    },
+    inp (schemata, cb) {
+      const operation = Operation(Operation.TYPE.INP, schemata)
+      execute(operation, cb)
+    },
+    rd (schemata, cb) {
+      const operation = Operation(Operation.TYPE.RD, schemata)
+      execute(operation, cb)
+    },
+    rdp (schemata, cb) {
+      const operation = Operation(Operation.TYPE.RDP, schemata)
+      execute(operation, cb)
+    },
+    rdpAll (schemata, cb) {
+      const operation = Operation(Operation.TYPE.RDP_ALL, schemata)
+      execute(operation, cb)
+    },
+    eval (activeTuple, cb) {
+      const operation = Operation(Operation.TYPE.EVAL, activeTuple)
+      execute(operation, cb)
+    }
+  }
 }
 
 module.exports = Agent
