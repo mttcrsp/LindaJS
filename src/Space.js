@@ -177,11 +177,4 @@ const Space = (injectedStore) => {
     }
 }
 
-Array.isArrayOfObjects = function (array) {
-    return (
-        Array.isArray(array) &&
-        _.every(array, e => typeof(e) === 'object')
-    )
-}
-
 module.exports = Space
