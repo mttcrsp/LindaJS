@@ -20,15 +20,15 @@ const Permission = (type, operand) => {
       }
 
       switch (operation.type) {
-        case Operation.TYPE.OUT:
+        case Operation.TYPE.WRITE:
         case Operation.TYPE.EVAL:
           const result = match(operand, operation.operand)
           return result !== undefined
-        case Operation.TYPE.IN:
-        case Operation.TYPE.RD:
-        case Operation.TYPE.INP:
-        case Operation.TYPE.RDP:
-        case Operation.TYPE.RDP_ALL:
+        case Operation.TYPE.TAKE:
+        case Operation.TYPE.TAKE_NOW:
+        case Operation.TYPE.READ:
+        case Operation.TYPE.READ_NOW:
+        case Operation.TYPE.READ_ALL_NOW:
           return isSubpattern(operand, operation.operand)
         default:
           return false

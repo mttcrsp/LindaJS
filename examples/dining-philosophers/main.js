@@ -47,9 +47,9 @@ const Philosopher = id => {
   const eat = cb => {
     setTimeout(() => {
       async.series([
-        async.apply(agent.in, { type: 'room ticket' }),
-        async.apply(agent.in, { type: 'fork', index: left }),
-        async.apply(agent.in, { type: 'fork', index: right })
+        async.apply(agent.take, { type: 'room ticket' }),
+        async.apply(agent.take, { type: 'fork', index: left }),
+        async.apply(agent.take, { type: 'fork', index: right })
       ], () => {
         console.log(id + ' is thinking')
         cb()
@@ -60,9 +60,9 @@ const Philosopher = id => {
   const think = cb => {
     setTimeout(() => {
       async.series([
-        async.apply(agent.out, { type: 'room ticket' }),
-        async.apply(agent.out, { type: 'fork', index: left }),
-        async.apply(agent.out, { type: 'fork', index: right })
+        async.apply(agent.write, { type: 'room ticket' }),
+        async.apply(agent.write, { type: 'fork', index: left }),
+        async.apply(agent.write, { type: 'fork', index: right })
       ], () => {
         console.log(id + ' is eating')
         cb()

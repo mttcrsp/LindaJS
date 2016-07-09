@@ -62,7 +62,7 @@ const Administration = () => {
   return {
     createCourse (id, cb) {
       const course = { type: Model.COURSE, id }
-      agent.out(course, cb)
+      agent.write(course, cb)
     }
   }
 }
@@ -71,20 +71,20 @@ const Professor = () => {
   const agent = space.createAgent(Roles.PROFESSOR_ROLE)
   return {
     watchCourse (cb) {
-      agent.rd({
+      agent.read({
         type: Model.COURSE,
         id: _
       }, cb)
     },
     openSession (session, cb) {
-      agent.out({
+      agent.write({
         type: Model.SESSION,
         course: session.course,
         date: session.date
       }, cb)
     },
     watchAssignment (session, cb) {
-      agent.rd({
+      agent.read({
         type: Model.ASSIGNMENT,
         course: session.course,
         date: session.date,
@@ -92,7 +92,7 @@ const Professor = () => {
       }, cb)
     },
     assignGrade (result, cb) {
-      agent.out({
+      agent.write({
         type: Model.GRADE,
         course: result.course,
         date: result.date,
@@ -101,7 +101,7 @@ const Professor = () => {
       }, cb)
     },
     closeSession (session, cb) {
-      agent.inp({
+      agent.takeNow({
         type: Model.SESSION,
         course: session.course,
         date: session.date
@@ -119,27 +119,27 @@ const Student = id => {
   const student = id
   return {
     watchCourse (cb) {
-      agent.rd({
+      agent.read({
         type: Model.COURSE,
         id: _
       }, cb)
     },
     enroll (course, cb) {
-      agent.out({
+      agent.write({
         type: Model.ENROLL,
         course,
         student
       }, cb)
     },
     watchSession (course, cb) {
-      agent.rd({
+      agent.read({
         type: Model.SESSION,
         course,
         date: _
       }, cb)
     },
     takeExam (session, cb) {
-      agent.out({
+      agent.write({
         type: Model.ASSIGNMENT,
         course: session.course,
         date: session.date,
@@ -147,7 +147,7 @@ const Student = id => {
       }, cb)
     },
     watchResult (session, cb) {
-      agent.rd({
+      agent.read({
         type: Model.GRADE,
         course: session.course,
         date: session.date,
@@ -156,7 +156,7 @@ const Student = id => {
       }, cb)
     },
     acceptGrade (grade, cb) {
-      agent.out({
+      agent.write({
         type: Model.GRADE,
         course: grade.course,
         date: grade.date,
@@ -166,7 +166,7 @@ const Student = id => {
       }, cb)
     },
     rejectGrade (grade, cb) {
-      agent.inp({
+      agent.takeNow({
         type: Model.GRADE,
         course: grade.course,
         date: grade.date,

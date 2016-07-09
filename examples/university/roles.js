@@ -10,7 +10,7 @@ const Model = require('./model')
 // course tuple to the space using the format specified above.
 
 const CREATE_COURSE_PERMISSION = Permission(
-  Operation.TYPE.OUT, { type: Model.COURSE, id: _ }
+  Operation.TYPE.WRITE, { type: Model.COURSE, id: _ }
 )
 const ADMINISTRATION_ROLE = Role([CREATE_COURSE_PERMISSION])
 
@@ -22,23 +22,23 @@ const ADMINISTRATION_ROLE = Role([CREATE_COURSE_PERMISSION])
 //  - assign a grade to a student.
 
 const READ_COURSES_PERMISSION = Permission(
-  Operation.TYPE.RD,
+  Operation.TYPE.READ,
   { type: Model.COURSE, id: _ }
 )
 const OPEN_SESSION_PERMISSION = Permission(
-  Operation.TYPE.OUT,
+  Operation.TYPE.WRITE,
   { type: Model.SESSION, course: _, date: _ }
 )
 const CLOSE_SESSION_PERMISSION = Permission(
-  Operation.TYPE.INP,
+  Operation.TYPE.TAKE_NOW,
   { type: Model.SESSION, course: _, date: _ }
 )
 const READ_ASSIGNMENTS_PERMISSION = Permission(
-  Operation.TYPE.RD,
+  Operation.TYPE.READ,
   { type: Model.ASSIGNMENT, course: _, date: _, student: _ }
 )
 const ASSIGN_GRADE_PERMISSION = Permission(
-  Operation.TYPE.OUT,
+  Operation.TYPE.WRITE,
   { type: Model.GRADE, course: _, date: _, student: _, grade: _ }
 )
 
@@ -63,27 +63,27 @@ const createStudentRole = id => {
   const student = id
 
   const ENROLL_PERMISSION = Permission(
-    Operation.TYPE.OUT,
+    Operation.TYPE.WRITE,
     { type: Model.ENROLL, course: _, student }
   )
   const READ_SESSIONS_PERMISSION = Permission(
-    Operation.TYPE.RD,
+    Operation.TYPE.READ,
     { type: Model.SESSION, course: _, date: _ }
   )
   const TAKE_EXAM_PERMISSION = Permission(
-    Operation.TYPE.OUT,
+    Operation.TYPE.WRITE,
     { type: Model.ASSIGNMENT, course: _, date: _, student }
   )
   const READ_RESULTS_PERMISSION = Permission(
-    Operation.TYPE.RD,
+    Operation.TYPE.READ,
     { type: Model.GRADE, course: _, date: _, student, grade: _ }
   )
   const REJECT_GRADE_PERMISSION = Permission(
-    Operation.TYPE.INP,
+    Operation.TYPE.TAKE_NOW,
     { type: Model.GRADE, course: _, date: _, student, grade: _ }
   )
   const ACCEPT_GRADE_PERMISSION = Permission(
-    Operation.TYPE.OUT,
+    Operation.TYPE.WRITE,
     {
       type: Model.GRADE,
       course: _,

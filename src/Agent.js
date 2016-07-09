@@ -46,28 +46,28 @@ const Agent = (space, role) => {
   }
 
   return {
-    out (tuple, cb) {
-      const operation = Operation(Operation.TYPE.OUT, tuple)
+    write (tuple, cb) {
+      const operation = Operation(Operation.TYPE.WRITE, tuple)
       execute(operation, cb)
     },
-    in (schemata, cb) {
-      const operation = Operation(Operation.TYPE.IN, schemata)
+    take (schemata, cb) {
+      const operation = Operation(Operation.TYPE.TAKE, schemata)
       execute(operation, cb)
     },
-    inp (schemata, cb) {
-      const operation = Operation(Operation.TYPE.INP, schemata)
+    takeNow (schemata, cb) {
+      const operation = Operation(Operation.TYPE.TAKE_NOW, schemata)
       execute(operation, cb)
     },
-    rd (schemata, cb) {
-      const operation = Operation(Operation.TYPE.RD, schemata)
+    read (schemata, cb) {
+      const operation = Operation(Operation.TYPE.READ, schemata)
       execute(operation, cb)
     },
-    rdp (schemata, cb) {
-      const operation = Operation(Operation.TYPE.RDP, schemata)
+    readNow (schemata, cb) {
+      const operation = Operation(Operation.TYPE.READ_NOW, schemata)
       execute(operation, cb)
     },
-    rdpAll (schemata, cb) {
-      const operation = Operation(Operation.TYPE.RDP_ALL, schemata)
+    readAllNow (schemata, cb) {
+      const operation = Operation(Operation.TYPE.READ_ALL_NOW, schemata)
       execute(operation, cb)
     },
     eval (activeTuple, cb) {

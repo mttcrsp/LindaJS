@@ -35,14 +35,14 @@ describe('Space', function () {
   }
 
   const read = Permission(
-    Operation.TYPE.IN,
+    Operation.TYPE.TAKE,
     {
       id: 1,
       name: 'Bob'
     }
   )
   const write = Permission(
-    Operation.TYPE.OUT,
+    Operation.TYPE.WRITE,
     {
       id: 1,
       name: 'Bob'
@@ -247,7 +247,7 @@ describe('Space', function () {
   describe('#createAgent([roles])', function () {
     it('should create an agent able to work on this space', function (done) {
       const agent = space.createAgent()
-      agent.out(tuple, (err, added) => {
+      agent.write(tuple, (err, added) => {
         expect(err).toNotExist()
         expect(added).toBe(tuple)
 
@@ -276,7 +276,7 @@ describe('Space', function () {
 
       series([
         apply(space.add, tuple),
-        apply(agent.in, schemata)
+        apply(agent.take, schemata)
       ], (err, res) => {
         expect(err).toNotExist()
         expect(res[1]).toExist()
@@ -292,7 +292,7 @@ describe('Space', function () {
 
       const agent = space.createAgent(User)
 
-      agent.out(tuple, (err, added) => {
+      agent.write(tuple, (err, added) => {
         expect(err).toExist()
         expect(added).toNotExist()
 

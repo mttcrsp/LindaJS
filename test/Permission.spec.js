@@ -36,9 +36,9 @@ describe('Permission', function () {
 
   describe('#authorizes', function () {
     it('should return true for compatible operations', function () {
-      const write = Operation(Operation.TYPE.OUT, tuple)
+      const write = Operation(Operation.TYPE.WRITE, tuple)
       const permission = Permission(
-        Operation.TYPE.OUT,
+        Operation.TYPE.WRITE,
         schemata
       )
       expect(
@@ -47,9 +47,9 @@ describe('Permission', function () {
     })
 
     it('should return false for operations with an incompatible type', function () {
-      const write = Operation(Operation.TYPE.OUT, tuple)
+      const write = Operation(Operation.TYPE.WRITE, tuple)
       const permission = Permission(
-        Operation.TYPE.IN,
+        Operation.TYPE.TAKE,
         schemata
       )
       expect(
@@ -58,18 +58,18 @@ describe('Permission', function () {
     })
 
     it('should return false for operation with an incompatible operand', function () {
-      const read = Operation(Operation.TYPE.IN, schemata)
+      const read = Operation(Operation.TYPE.TAKE, schemata)
       const readPermission = Permission(
-        Operation.TYPE.IN,
+        Operation.TYPE.TAKE,
         otherSchemata
       )
       expect(
         readPermission.authorizes(read)
       ).toBe(false)
 
-      const write = Operation(Operation.TYPE.OUT, tuple)
+      const write = Operation(Operation.TYPE.WRITE, tuple)
       const writePermission = Permission(
-        Operation.TYPE.OUT,
+        Operation.TYPE.WRITE,
         otherSchemata
       )
       expect(
@@ -79,11 +79,11 @@ describe('Permission', function () {
 
     it('should return true for more specific operations', function () {
       const write = Operation(
-        Operation.TYPE.IN,
+        Operation.TYPE.TAKE,
         schemata
       )
       const permission = Permission(
-        Operation.TYPE.IN,
+        Operation.TYPE.TAKE,
         genericSchemata
       )
       expect(
@@ -93,11 +93,11 @@ describe('Permission', function () {
 
     it('should return false for more generic operations', function () {
       const write = Operation(
-        Operation.TYPE.IN,
+        Operation.TYPE.TAKE,
         genericSchemata
       )
       const permission = Permission(
-        Operation.TYPE.IN,
+        Operation.TYPE.TAKE,
         schemata
       )
       expect(

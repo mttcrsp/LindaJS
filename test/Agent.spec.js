@@ -41,18 +41,18 @@ describe('Agent', function () {
 
   it('should not be able to operate on the space while blocked', function (done) {
     // Given that the space is empty this operation should block the agent
-    agent.in(schemata, () => {
+    agent.take(schemata, () => {
     })
 
-    agent.out(tuple, err => {
+    agent.write(tuple, err => {
       expect(err).toExist()
       done()
     })
   })
 
-  describe('#out(tuple, callback)', function () {
+  describe('#write(tuple, callback)', function () {
     it('should add a tuple to the space', function (done) {
-      agent.out(tuple, err => {
+      agent.write(tuple, err => {
         expect(err).toNotExist()
 
         const tuples = space.getTuples()
@@ -63,7 +63,7 @@ describe('Agent', function () {
     })
 
     it('should not be able to add an invalid tuple to the space', function (done) {
-      agent.out(invalidTuple, err => {
+      agent.write(invalidTuple, err => {
         expect(err).toExist()
 
         const tuples = space.getTuples()
@@ -74,12 +74,12 @@ describe('Agent', function () {
     })
   })
 
-  describe('#rd(schemata, callback)', function () {
+  describe('#read(schemata, callback)', function () {
     it('should return a tuple if the tuple is already in the space without removing it', function (done) {
       space = Space([tuple])
       agent = space.createAgent()
 
-      agent.rd(schemata, (err, match) => {
+      agent.read(schemata, (err, match) => {
         expect(err).toNotExist()
         expect(match).toBe(tuple)
         done()
@@ -92,7 +92,7 @@ describe('Agent', function () {
         })
       }, 100)
 
-      agent.rd(schemata, (err, res) => {
+      agent.read(schemata, (err, res) => {
         expect(err).toNotExist()
         expect(res).toBe(tuple)
         done()
@@ -100,12 +100,12 @@ describe('Agent', function () {
     })
   })
 
-  describe('#in(schemata, callback)', function () {
+  describe('#take(schemata, callback)', function () {
     it('should return a tuple if the tuple is already in the space and then delete it', function (done) {
       space = Space([tuple])
       agent = space.createAgent()
 
-      agent.in(schemata, (err, res) => {
+      agent.take(schemata, (err, res) => {
         expect(err).toNotExist()
         expect(res).toBe(tuple)
 
@@ -122,7 +122,7 @@ describe('Agent', function () {
         })
       }, 100)
 
-      agent.in(schemata, (err, res) => {
+      agent.take(schemata, (err, res) => {
         expect(err).toNotExist()
         expect(res).toBe(tuple)
 
@@ -134,12 +134,12 @@ describe('Agent', function () {
     })
   })
 
-  describe('#inp(schemata, callback)', function () {
+  describe('#takeNow(schemata, callback)', function () {
     it('should return a tuple if the tuple is already in the space and then delete it', function (done) {
       space = Space([tuple])
       agent = space.createAgent()
 
-      agent.inp(schemata, (err, res) => {
+      agent.takeNow(schemata, (err, res) => {
         expect(err).toNotExist()
         expect(res).toBe(tuple)
 
@@ -156,7 +156,7 @@ describe('Agent', function () {
         })
       }, 100)
 
-      agent.inp(schemata, (err, res) => {
+      agent.takeNow(schemata, (err, res) => {
         expect(err).toNotExist()
         expect(res).toNotExist()
         done()
@@ -164,12 +164,12 @@ describe('Agent', function () {
     })
   })
 
-  describe('#rdp(schemata, callback)', function () {
+  describe('#readNow(schemata, callback)', function () {
     it('should return a tuple if the tuple is already in the space', function (done) {
       space = Space([tuple])
       agent = space.createAgent()
 
-      agent.rdp(schemata, (err, res) => {
+      agent.readNow(schemata, (err, res) => {
         expect(err).toNotExist()
         expect(res).toBe(tuple)
 
@@ -186,7 +186,7 @@ describe('Agent', function () {
         })
       }, 100)
 
-      agent.rdp(schemata, (err, res) => {
+      agent.readNow(schemata, (err, res) => {
         expect(err).toNotExist()
         expect(res).toNotExist()
         done()
@@ -194,12 +194,12 @@ describe('Agent', function () {
     })
   })
 
-  describe('#rdpAll(schemata, callback)', function () {
+  describe('#readAllNow(schemata, callback)', function () {
     it('should return all of the tuple matching the schemata that are currently in the space', function (done) {
       space = Space([tuple, tuple])
       agent = space.createAgent()
 
-      agent.rdpAll(schemata, (err, res) => {
+      agent.readAllNow(schemata, (err, res) => {
         expect(err).toNotExist()
         expect(res.length).toBe(2)
         expect(res[0]).toBe(tuple)

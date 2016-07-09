@@ -10,7 +10,7 @@ const Operation = (type, operand) => {
 
   let operation
   switch (type) {
-    case Operation.TYPE.OUT:
+    case Operation.TYPE.WRITE:
       operation = (space, cb) => {
         space.add(operand, cb)
       }
@@ -24,7 +24,7 @@ const Operation = (type, operand) => {
     // should be specified: the way in which the operation should search
     // the space (blocking/non blocking) and whether the matched tuple
     // should be removed.
-    case Operation.TYPE.IN:
+    case Operation.TYPE.TAKE:
       operation = (space, cb) => {
         async.waterfall([
           async.apply(space.searchUntilFound, operand),
@@ -32,7 +32,7 @@ const Operation = (type, operand) => {
         ], cb)
       }
       break
-    case Operation.TYPE.INP:
+    case Operation.TYPE.TAKE_NOW:
       operation = (space, cb) => {
         space.search(operand, (err, tuple) => {
           if (!tuple || err) {
@@ -42,17 +42,17 @@ const Operation = (type, operand) => {
         })
       }
       break
-    case Operation.TYPE.RD:
+    case Operation.TYPE.READ:
       operation = (space, cb) => {
         space.searchUntilFound(operand, cb)
       }
       break
-    case Operation.TYPE.RDP:
+    case Operation.TYPE.READ_NOW:
       operation = (space, cb) => {
         space.search(operand, cb)
       }
       break
-    case Operation.TYPE.RDP_ALL:
+    case Operation.TYPE.READ_ALL_NOW:
       operation = (space, cb) => {
         space.searchMany(operand, cb)
       }
@@ -97,12 +97,12 @@ const Operation = (type, operand) => {
 }
 
 Operation.TYPE = {
-  OUT: 'OUT',
-  IN: 'IN',
-  INP: 'INP',
-  RD: 'RD',
-  RDP: 'RDP',
-  RDP_ALL: 'RDP_ALL',
+  WRITE: 'WRITE',
+  TAKE: 'TAKE',
+  TAKE_NOW: 'TAKE_NOW',
+  READ: 'READ',
+  READ_NOW: 'READ_NOW',
+  READ_ALL_NOW: 'READ_ALL_NOW',
   EVAL: 'EVAL'
 }
 

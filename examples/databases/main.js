@@ -17,13 +17,13 @@ createStore(URL, (storeErr, store) => {
     age: 23
   }
 
-  agent.in(tuple, (err, res) => {
+  agent.take(tuple, (err, res) => {
     console.log(err, res)
     store.close()
   })
 
   setTimeout(() => {
-    otherAgent.out(tuple, () => {
+    otherAgent.write(tuple, () => {
     }) // eslint-disable-line max-nested-callbacks
   }, 1000)
 })

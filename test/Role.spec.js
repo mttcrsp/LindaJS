@@ -21,8 +21,8 @@ describe('Role', function () {
   describe('#constructor', function () {
     it('should return a role with the specified permissions', function () {
       const permissions = [
-        Permission(Operation.TYPE.OUT, schemata),
-        Permission(Operation.TYPE.IN, schemata)
+        Permission(Operation.TYPE.WRITE, schemata),
+        Permission(Operation.TYPE.TAKE, schemata)
       ]
 
       const role = Role(permissions)
@@ -33,8 +33,8 @@ describe('Role', function () {
 
     it('should return a role that inherits permissions from the specified superroles', function () {
       const permissions = [
-        Permission(Operation.TYPE.OUT, schemata),
-        Permission(Operation.TYPE.IN, schemata)
+        Permission(Operation.TYPE.WRITE, schemata),
+        Permission(Operation.TYPE.TAKE, schemata)
       ]
 
       const parentRole = Role(permissions)
@@ -50,8 +50,8 @@ describe('Role', function () {
     })
 
     it('should return a role that inherits permissions from multiple parents', function () {
-      const write = Permission(Operation.TYPE.OUT, schemata)
-      const read = Permission(Operation.TYPE.IN, schemata)
+      const write = Permission(Operation.TYPE.WRITE, schemata)
+      const read = Permission(Operation.TYPE.TAKE, schemata)
 
       const parent1 = Role([write])
       const parent2 = Role([read])
@@ -65,10 +65,10 @@ describe('Role', function () {
 
   describe('#can(operation)', function () {
     it('should return true if the role has a compatible permission', function () {
-      const operation = Operation(Operation.TYPE.OUT, tuple)
+      const operation = Operation(Operation.TYPE.WRITE, tuple)
 
-      const read = Permission(Operation.TYPE.IN, schemata)
-      const write = Permission(Operation.TYPE.OUT, schemata)
+      const read = Permission(Operation.TYPE.TAKE, schemata)
+      const write = Permission(Operation.TYPE.WRITE, schemata)
       const role = Role([read, write])
 
       expect(
@@ -77,9 +77,9 @@ describe('Role', function () {
     })
 
     it('should return false if the role does have a compatible permission', function () {
-      const operation = Operation(Operation.TYPE.OUT, tuple)
+      const operation = Operation(Operation.TYPE.WRITE, tuple)
 
-      const read = Permission(Operation.TYPE.IN, schemata)
+      const read = Permission(Operation.TYPE.TAKE, schemata)
       const role = Role([read])
 
       expect(
