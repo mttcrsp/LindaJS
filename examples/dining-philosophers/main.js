@@ -1,18 +1,19 @@
-// This examples shows the basic API of this library. The interesting bit is
+// This example shows the basic API of this library. The interesting bit is
 // represented by the fact that a philosopher only has to know about how to
-// implement its behavior and then is able to live inside the space. This
-// example does not show how Linda can be used to solve concurrency problems
-// at its best since deadlock situations may arise; as a matter of facts this
-// program alts when a deadlock is reached.
+// implement its behavior and how a fork tuple is made. It does not need to
+// know anything about the other agents that live in its same space.
+// This example does not show how Linda can be used to solve concurrency
+// problems at its best since deadlock situations may arise; as a matter of
+// facts this program alts when a deadlock is reached.
 const Linda = require('../../src/Linda')
-const Range = require('lodash').range
+const lodash = require('lodash')
+const range = lodash.range
 const async = require('async')
 const whilst = async.whilst
 const series = async.series
 const apply = async.apply
 
-const FOREVER = () => true
-
+// Constants representing the four different states a philosopher can be in.
 const State = {
   THINK: 'THINK',
   PREPARE: 'PREPARE',
@@ -20,16 +21,18 @@ const State = {
   RELEASE: 'RELEASE'
 }
 
+const forever = () => true
+
 const random = (min, max) => {
   return Math.floor(Math.random() * max) + min
 }
 
-// This variable controls the number of philosophers that will be generated
+// This variable controls the number of philosophers that will be generated.
 const PHILOSOPHERS_COUNT = 5
 
-// These next few lines setup the space with the necessary tuples: the forks
-// and tickets that philosophers will use to eat.
-const forks = Range(PHILOSOPHERS_COUNT).map(i => {
+// These next few lines setup the space using an in-memory store initialized
+// with the necessary tuples: the forks philosophers will use to eat.
+const forks = range(PHILOSOPHERS_COUNT).map(i => {
   return { type: 'fork', index: i }
 })
 const store = Linda.Store(forks)
@@ -37,21 +40,26 @@ const space = Linda.Space(store)
 
 // A philosopher is a simple evolution of an agent. It encapsulates an agent
 // and implement 4 basic behaviors:
-//  1. Think for some amount of time (THINK STATE)
+//  1. Think for some amount of time (THINK STATE);
 //  2. When you are done with thinking start looking for the resources you
-//     need: your left fork and your right fork (PREPARE STATE)
+//     need: your left fork and your right fork (PREPARE STATE);
 //  3. When you have acquired all of the necessary resources start eating for
-//     an indefinite amount of time (EAT STATE)
+//     an indefinite amount of time (EAT STATE);
 //  4. When you are done eating return the resources you previously acquired.
-//     (PREPARE STATE)
+//     (PREPARE STATE).
 const Philosopher = id => {
   const agent = space.createAgent()
 
+  // Identify the index of the fork to the left and to the fork to the right of
+  // the agent.
   const left = id
   const right = (id + 1) % PHILOSOPHERS_COUNT
 
+  // An agent starts out in the prepare to eat state as it has not acquired.
   let state = State.PREPARE
 
+  // While eating set the state to EAT, as soon as the timeout expires set the
+  // state to RELEASE.
   const eat = cb => {
     state = State.EAT
     setTimeout(() => {
@@ -59,7 +67,6 @@ const Philosopher = id => {
       cb()
     }, random(500, 1000))
   }
-
   const think = cb => {
     state = State.THINK
     setTimeout(() => {
@@ -82,7 +89,7 @@ const Philosopher = id => {
       }
     },
     live () {
-      whilst(FOREVER, cb => {
+      whilst(forever, cb => {
         series([
           apply(agent.take, { type: 'fork', index: left }),
           apply(agent.take, { type: 'fork', index: right }),
@@ -97,13 +104,14 @@ const Philosopher = id => {
 }
 
 // Instantiate the philosophers
-const philosophers = Range(PHILOSOPHERS_COUNT).map(Philosopher)
+const philosophers = range(PHILOSOPHERS_COUNT).map(Philosopher)
+
 // Start the interaction
 philosophers.forEach(
-  philosopher => setTimeout(() => philosopher.live(), random(500, 5000))
+  philosopher => philosopher.live()
 )
 
-// Log the overall state changes to the console
+// Log the state of the overall system to the console every 500ms.
 const getPhilosophersDescription = philosophers => philosophers.reduce(
   (previous, philosopher) => {
     const philosopherState = philosopher.getState()
